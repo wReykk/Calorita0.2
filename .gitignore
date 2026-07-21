@@ -1,0 +1,9 @@
+node_modules
+dist
+tasks.json
+*.js
+*.js.map
+*.d.ts
+.env
+
+/src/generated/prisma
