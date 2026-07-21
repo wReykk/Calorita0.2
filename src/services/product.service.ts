@@ -9,5 +9,35 @@ export class ProductService {
     public getAllProducts(): Product[] {
         return this.mockProducts;
     }
+    public getProductById(id: string): Product | undefined {
+        return this.mockProducts.find(p => p.id === id);
+    }
 
+    public createProduct(data: Omit<Product, 'id'>): Product {
+        const newProduct: Product = {
+            id: Date.now().toString(),
+            ...data,
+        };
+        this.mockProducts.push(newProduct);
+        return newProduct;
+    }
+
+    public updateProduct(id: string, data: Partial<Omit<Product, 'id'>>): Product | null {
+        const index = this.mockProducts.findIndex(p => p.id === id);
+        if (index === -1) return null;
+
+        this.mockProducts[index] = {
+            ...this.mockProducts[index],
+            ...data,
+        } as Product;
+        return this.mockProducts[index];
+    }
+
+    public deleteProduct(id: string): boolean {
+        const index = this.mockProducts.findIndex(p => p.id === id);
+        if (index === -1) return false;
+
+        this.mockProducts.splice(index, 1);
+        return true;
+    }
 }
