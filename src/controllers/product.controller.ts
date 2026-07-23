@@ -23,14 +23,14 @@ export class ProductController {
 
     public createProduct = (req: Request, res: Response): void => {
         try {
-            const { name, calories, protein, fat, carbs } = req.body;
+            const { name, price, description } = req.body;
 
-            if (!name || calories === undefined) {
-                res.status(400).json({ message: 'Name and calories are necessary.' });
+            if (!name || price === undefined) {
+                res.status(400).json({ message: 'Name and price are required.' });
                 return;
             }
 
-            const newProduct = productService.createProduct({ name, calories, protein, fat, carbs });
+            const newProduct = productService.createProduct({ name, price, description });
             res.status(201).json(newProduct);
         } catch (error) {
             res.status(500).json({ message: 'Something happened while creating new product' });

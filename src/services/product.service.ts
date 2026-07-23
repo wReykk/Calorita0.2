@@ -2,27 +2,40 @@ import { type Product } from '../types/product.interface.js';
 
 export class ProductService {
     private mockProducts: Product[] = [
-        { id: '1', name: 'Chicken', calories: 113, protein: 23.6, fat: 1.9, carbs: 0.4 },
-        { id: '2', name: 'Buckwheat', calories: 108, protein: 4.2, fat: 1.1, carbs: 21.3 },
+        {
+            id: '1',
+            name: 'Sample Product 1',
+            price: 19.99,
+            description: 'A sample product',
+            createdAt: new Date(),
+        },
+        {
+            id: '2',
+            name: 'Sample Product 2',
+            price: 29.99,
+            createdAt: new Date(),
+        },
     ];
 
     public getAllProducts(): Product[] {
         return this.mockProducts;
     }
+
     public getProductById(id: string): Product | undefined {
         return this.mockProducts.find(p => p.id === id);
     }
 
-    public createProduct(data: Omit<Product, 'id'>): Product {
+    public createProduct(data: Omit<Product, 'id' | 'createdAt'>): Product {
         const newProduct: Product = {
             id: Date.now().toString(),
             ...data,
+            createdAt: new Date(),
         };
         this.mockProducts.push(newProduct);
         return newProduct;
     }
 
-    public updateProduct(id: string, data: Partial<Omit<Product, 'id'>>): Product | null {
+    public updateProduct(id: string, data: Partial<Omit<Product, 'id' | 'createdAt'>>): Product | null {
         const index = this.mockProducts.findIndex(p => p.id === id);
         if (index === -1) return null;
 
