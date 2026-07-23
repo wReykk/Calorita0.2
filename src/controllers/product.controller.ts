@@ -4,24 +4,32 @@ import { ProductService } from '../services/product.service.js';
 const productService = new ProductService();
 
 export class ProductController {
-    public getProducts = (req: Request, res: Response): void => {
-        const products = productService.getAllProducts();
-        res.status(200).json(products);
-    };
-
-    public getProductById = (req: Request<{ id: string }>, res: Response): void => {
-        const { id } = req.params;
-        const product = productService.getProductById(id);
-
-        if (!product) {
-            res.status(404).json({ message: 'No product found' });
-            return;
+    public getProducts = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const products = await productService.getAllProducts();
+            res.status(200).json(products);
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to fetch products' });
         }
-
-        res.status(200).json(product);
     };
 
-    public createProduct = (req: Request, res: Response): void => {
+    public getProductById = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const product = await productService.getProductById(id);
+
+            if (!product) {
+                res.status(404).json({ message: 'No product found' });
+                return;
+            }
+
+            res.status(200).json(product);
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to fetch product' });
+        }
+    };
+
+    public createProduct = async (req: Request, res: Response): Promise<void> => {
         try {
             const { name, price, description } = req.body;
 
@@ -30,34 +38,36 @@ export class ProductController {
                 return;
             }
 
-            const newProduct = productService.createProduct({ name, price, description });
+            const newProduct = await productService.createProduct({ name, price, description });
             res.status(201).json(newProduct);
         } catch (error) {
             res.status(500).json({ message: 'Something happened while creating new product' });
         }
     };
 
-    public updateProduct = (req: Request<{ id: string }>, res: Response): void => {
-        const { id } = req.params;
-        const updatedProduct = productService.updateProduct(id, req.body);
+    public updateProduct = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const updatedProduct = await productService.updateProduct(id, req.body);
 
-        if (!updatedProduct) {
-            res.status(404).json({ message: 'No product to update found' });
-            return;
+            if (!updatedProduct) {
+                res.status(404).json({ message: 'No product to update found' });
+                return;
+            }
+
+            res.status(200).json(updatedProduct);
+        } catch (error) {
+            res.status(404).json({ message: 'No product to update found or update failed' });
         }
-
-        res.status(200).json(updatedProduct);
     };
 
-    public deleteProduct = (req: Request<{ id: string }>, res: Response): void => {
-        const { id } = req.params;
-        const success = productService.deleteProduct(id);
-
-        if (!success) {
+    public deleteProduct = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            await productService.deleteProduct(id);
+            res.status(200).json({ message: 'Product deleted successfully' });
+        } catch (error) {
             res.status(404).json({ message: 'No product to delete found' });
-            return;
         }
-
-        res.status(200).json({ message: 'Product deleted successfully' });
     };
 }
