@@ -7,3 +7,4 @@ tasks.json
 .env
 
 /src/generated/prisma
+.aider*
