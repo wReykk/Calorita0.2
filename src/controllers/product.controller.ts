@@ -31,14 +31,22 @@ export class ProductController {
 
     public createProduct = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { name, price, description } = req.body;
+            const { name, calories, protein, fat, carbs, description } = req.body;
 
-            if (!name || price === undefined) {
-                res.status(400).json({ message: 'Name and price are required.' });
+            // Проверяем обязательные поля для трекера калорий
+            if (!name || calories === undefined) {
+                res.status(400).json({ message: 'Name and calories are required.' });
                 return;
             }
 
-            const newProduct = await productService.createProduct({ name, price, description });
+            const newProduct = await productService.createProduct({
+                name,
+                calories,
+                protein,
+                fat,
+                carbs,
+                description
+            });
             res.status(201).json(newProduct);
         } catch (error) {
             res.status(500).json({ message: 'Something happened while creating new product' });

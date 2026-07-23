@@ -2,7 +2,7 @@
 // npm install --save-dev prisma dotenv
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
-import { PrismaClient } from "@prisma/client/extension";
+import { PrismaClient } from './client/index.js';
 
 export const prisma = new PrismaClient()
 

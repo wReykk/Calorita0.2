@@ -5,6 +5,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "./client"
 }
 
 datasource db {
@@ -15,7 +16,10 @@ datasource db {
 model Product {
   id          String   @id @default(uuid())
   name        String
-  price       Float
+  calories    Int     
+  protein     Float?  
+  fat         Float? 
+  carbs       Float? 
   description String?
   createdAt   DateTime @default(now())
 }
