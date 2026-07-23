@@ -37,5 +37,9 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+  },
+  "exclude": [
+    "frontend",
+    "node_modules"
+  ]
 }
