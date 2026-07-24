@@ -1,10 +1,11 @@
-import { type Request, type Response } from 'express';
+import { type NextFunction, type Request, type Response } from 'express';
 import { ProductService } from '../services/product.service.js';
+import { errorHandler } from '../middlewares/error.middleware.js';
 
 const productService = new ProductService();
 
 export class ProductController {
-    public getProducts = async (req: Request, res: Response): Promise<void> => {
+    public getProducts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const products = await productService.getAllProducts();
             res.status(200).json(products);
@@ -33,7 +34,6 @@ export class ProductController {
         try {
             const { name, calories, protein, fat, carbs, description } = req.body;
 
-            // Проверяем обязательные поля для трекера калорий
             if (!name || calories === undefined) {
                 res.status(400).json({ message: 'Name and calories are required.' });
                 return;
