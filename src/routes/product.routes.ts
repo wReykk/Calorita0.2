@@ -1,10 +1,13 @@
 import { Router } from 'express';
 import { ProductController } from '../controllers/product.controller.js';
 import { validate } from '../middlewares/validate.middleware.js';
+import { authenticate } from '../middlewares/auth.middleware.js';
 import { createProductSchema, updateProductSchema } from '../schemas/product.schema.js';
 
 const router = Router();
 const controller = new ProductController();
+
+router.use(authenticate);
 
 router.get('/', controller.getProducts);
 router.get('/:id', controller.getProductById);
