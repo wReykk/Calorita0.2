@@ -1,0 +1,43 @@
+import { type NextFunction, type Response } from 'express';
+import { DiaryService } from '../services/diary.service.js';
+import { type AuthRequest } from '../middlewares/auth.middleware.js';
+
+const diaryService = new DiaryService();
+
+export class DiaryController {
+
+    public addEntry = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const userId = req.userId as string;
+            const entry = await diaryService.addEntry(userId, req.body);
+
+            res.status(201).json(entry);
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    public getEntries = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const userId = req.userId as string;
+            const entries = await diaryService.getEntries(userId);
+
+            res.status(200).json(entries);
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    public deleteEntry = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const id = req.params.id as string;
+            const userId = req.userId as string;
+
+            await diaryService.deleteEntry(id, userId);
+
+            res.status(200).json({ message: 'Запись удалена из дневника' });
+        } catch (error) {
+            next(error);
+        }
+    };
+}

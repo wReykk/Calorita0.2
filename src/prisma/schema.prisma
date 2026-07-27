@@ -24,6 +24,8 @@ model Product {
 
   userId      String   
   user        User     @relation(fields: [userId], references: [id])
+
+  diaryEntry DiaryEntry[]
 }
 
 model User {
@@ -35,4 +37,21 @@ model User {
   updatedAt DateTime @updatedAt
 
   products  Product[]
+
+  diaryEntry DiaryEntry[]
+}
+
+model DiaryEntry {
+  id String @id @default(uuid())
+  date      DateTime @default(now())
+  amount    Float
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

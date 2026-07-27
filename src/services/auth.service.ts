@@ -28,8 +28,8 @@ export class AuthService {
             data: {
                 email: data.email,
                 password: hashedPassword,
-                name: data.name,
-            },
+                name: data.name ?? null,
+            }
         });
 
         const { password, ...userWithoutPassword } = newUser;
