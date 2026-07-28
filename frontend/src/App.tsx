@@ -1,13 +1,16 @@
 import { BrowserRouter, Link, Route, Routes, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import MyDiary from './pages/MyDiary'
 import Products from './pages/Products'
 import Register from './pages/Register'
+import i18n from './i18n'
 
 function Layout() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const isLoggedIn = Boolean(localStorage.getItem('token'))
   const username = localStorage.getItem('username') || ''
 
@@ -17,45 +20,58 @@ function Layout() {
     navigate('/login')
   }
 
+  const changeLanguage = (language: string) => {
+    i18n.changeLanguage(language)
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 w-full font-sans">
       <nav className="border-b border-slate-200 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4">
           <Link to="/" className="text-xl font-semibold tracking-tight">
             Calorita
           </Link>
 
-          <div className="flex items-center gap-4 text-sm font-medium">
+          <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
+            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-2 py-1">
+              <button type="button" onClick={() => changeLanguage('en')} className="rounded-full px-2 py-1 text-slate-700 transition hover:bg-white">
+                EN
+              </button>
+              <button type="button" onClick={() => changeLanguage('uk')} className="rounded-full px-2 py-1 text-slate-700 transition hover:bg-white">
+                UK
+              </button>
+            </div>
+
             {isLoggedIn ? (
               <>
                 <Link to="/" className="text-slate-600 transition hover:text-slate-900">
-                  Home
+                  {t('navbar.home')}
                 </Link>
                 <Link to="/diary" className="text-slate-600 transition hover:text-slate-900">
-                  My Diary
+                  {t('navbar.myDiary')}
                 </Link>
                 <Link to="/products" className="text-slate-600 transition hover:text-slate-900">
-                  Products
+                  {t('navbar.products')}
                 </Link>
                 <span className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                  {username ? `Hi, ${username}` : 'Logged in'}
+                  {username ? t('navbar.hi', { name: username }) : t('navbar.loggedIn')}
                 </span>
                 <button
                   type="button"
                   onClick={handleLogout}
                   className="rounded-full border border-slate-300 px-3 py-1.5 text-slate-700 transition hover:bg-slate-50"
                 >
-                  Logout
+                  {t('navbar.logout')}
                 </button>
               </>
             ) : (
               <>
                 <Link to="/login" className="text-slate-600 transition hover:text-slate-900">
-                  Login
+                  {t('navbar.login')}
                 </Link>
                 <Link to="/register" className="text-slate-600 transition hover:text-slate-900">
-                  Register
+                  {t('navbar.register')}
                 </Link>
               </>
             )}

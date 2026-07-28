@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
 
 type Product = {
@@ -38,6 +39,7 @@ function Products() {
     const [error, setError] = useState('')
     const [form, setForm] = useState<ProductFormState>(emptyForm)
     const [editState, setEditState] = useState<EditState>({ productId: null, values: emptyForm })
+    const { t } = useTranslation()
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -45,7 +47,7 @@ function Products() {
                 const response = await apiClient.get('/products')
                 setProducts(response.data || [])
             } catch {
-                setError('Failed to load products.')
+                setError(t('products.errorLoad'))
             } finally {
                 setLoading(false)
             }
@@ -71,7 +73,7 @@ function Products() {
             setProducts((prev) => [response.data, ...prev])
             setForm(emptyForm)
         } catch {
-            setError('Failed to create product.')
+            setError(t('products.errorCreate'))
         }
     }
 
@@ -80,7 +82,7 @@ function Products() {
             await apiClient.delete(`/products/${productId}`)
             setProducts((prev) => prev.filter((product) => product.id !== productId))
         } catch {
-            setError('Failed to delete product.')
+            setError(t('products.errorDelete'))
         }
     }
 
@@ -118,7 +120,7 @@ function Products() {
             setProducts((prev) => prev.map((product) => (product.id === editState.productId ? response.data : product)))
             setEditState({ productId: null, values: emptyForm })
         } catch {
-            setError('Failed to update product.')
+            setError(t('products.errorUpdate'))
         }
     }
 
@@ -126,15 +128,15 @@ function Products() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-semibold">Your Products</h1>
-                    <p className="text-sm text-slate-600">Add a product and manage your nutrition list.</p>
+                    <h1 className="text-2xl font-semibold">{t('products.title')}</h1>
+                    <p className="text-sm text-slate-600">{t('products.subtitle')}</p>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="mb-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Name</label>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">{t('products.name')}</label>
                         <input
                             value={form.name}
                             onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
@@ -144,7 +146,7 @@ function Products() {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Calories</label>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">{t('products.calories')}</label>
                         <input
                             type="number"
                             min="0"
@@ -156,7 +158,7 @@ function Products() {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Protein</label>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">{t('products.protein')}</label>
                         <input
                             type="number"
                             min="0"
@@ -168,7 +170,7 @@ function Products() {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Fat</label>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">{t('products.fat')}</label>
                         <input
                             type="number"
                             min="0"
@@ -180,7 +182,7 @@ function Products() {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Carbs</label>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">{t('products.carbs')}</label>
                         <input
                             type="number"
                             min="0"
@@ -196,7 +198,7 @@ function Products() {
                     type="submit"
                     className="rounded-lg bg-slate-900 px-4 py-2 font-medium text-white transition hover:bg-slate-700"
                 >
-                    Add product
+                    {t('products.addProduct')}
                 </button>
             </form>
 
@@ -208,11 +210,11 @@ function Products() {
 
             {loading ? (
                 <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-600">
-                    Loading products...
+                    {t('products.loading')}
                 </div>
             ) : products.length === 0 ? (
                 <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-600">
-                    No products found.
+                    {t('products.empty')}
                 </div>
             ) : (
                 <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -227,13 +229,13 @@ function Products() {
                                             onClick={() => startEdit(product)}
                                             className="rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                                         >
-                                            Edit
+                                            {t('products.edit')}
                                         </button>
                                         <button
                                             onClick={() => handleDelete(product.id)}
                                             className="rounded-full border border-red-200 px-3 py-1 text-sm font-medium text-red-600 transition hover:bg-red-50"
                                         >
-                                            Delete
+                                            {t('products.delete')}
                                         </button>
                                     </div>
                                 </div>
@@ -294,14 +296,14 @@ function Products() {
                                                 type="submit"
                                                 className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
                                             >
-                                                Save
+                                                {t('products.save')}
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => setEditState({ productId: null, values: emptyForm })}
                                                 className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                                             >
-                                                Cancel
+                                                {t('products.cancel')}
                                             </button>
                                         </div>
                                     </form>
@@ -309,19 +311,19 @@ function Products() {
 
                                 <div className="grid grid-cols-2 gap-2 text-sm text-slate-600">
                                     <div className="rounded-lg bg-slate-50 p-2">
-                                        <p className="text-xs uppercase tracking-wide text-slate-400">Calories</p>
+                                        <p className="text-xs uppercase tracking-wide text-slate-400">{t('products.calories')}</p>
                                         <p className="font-medium text-slate-900">{product.calories ?? 0}</p>
                                     </div>
                                     <div className="rounded-lg bg-slate-50 p-2">
-                                        <p className="text-xs uppercase tracking-wide text-slate-400">Protein</p>
+                                        <p className="text-xs uppercase tracking-wide text-slate-400">{t('products.protein')}</p>
                                         <p className="font-medium text-slate-900">{product.protein ?? 0}g</p>
                                     </div>
                                     <div className="rounded-lg bg-slate-50 p-2">
-                                        <p className="text-xs uppercase tracking-wide text-slate-400">Fat</p>
+                                        <p className="text-xs uppercase tracking-wide text-slate-400">{t('products.fat')}</p>
                                         <p className="font-medium text-slate-900">{product.fat ?? 0}g</p>
                                     </div>
                                     <div className="rounded-lg bg-slate-50 p-2">
-                                        <p className="text-xs uppercase tracking-wide text-slate-400">Carbs</p>
+                                        <p className="text-xs uppercase tracking-wide text-slate-400">{t('products.carbs')}</p>
                                         <p className="font-medium text-slate-900">{product.carbs ?? 0}g</p>
                                     </div>
                                 </div>

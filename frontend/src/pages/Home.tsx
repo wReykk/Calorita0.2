@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 function Home() {
     const navigate = useNavigate()
+    const { t } = useTranslation()
     const isLoggedIn = Boolean(localStorage.getItem('token'))
 
     if (!isLoggedIn) {
@@ -11,10 +13,10 @@ function Home() {
                     <div className="w-full max-w-3xl rounded-3xl border border-gray-200 bg-white p-10 shadow-sm sm:p-14">
                         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gray-500">Calorita</p>
                         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                            Track your meals with clarity.
+                            {t('home.title')}
                         </h1>
                         <p className="mt-4 max-w-2xl text-lg leading-8 text-gray-600">
-                            A calm, focused way to log what you eat, review your daily nutrition, and stay on top of your goals.
+                            {t('home.description')}
                         </p>
                         <div className="mt-8">
                             <button
@@ -22,7 +24,7 @@ function Home() {
                                 onClick={() => navigate('/login')}
                                 className="rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-800"
                             >
-                                Get Started
+                                {t('home.cta')}
                             </button>
                         </div>
                     </div>
@@ -37,10 +39,10 @@ function Home() {
                 <div className="mb-8">
                     <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gray-500">Welcome back</p>
                     <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
-                        Welcome back!
+                        {t('home.welcomeBackTitle')}
                     </h1>
                     <p className="mt-3 max-w-2xl text-base leading-7 text-gray-600">
-                        Continue where you left off and keep your nutrition routine moving forward.
+                        {t('home.welcomeBackDescription')}
                     </p>
                 </div>
 
@@ -51,9 +53,9 @@ function Home() {
                         className="rounded-3xl border border-gray-200 bg-white p-8 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                     >
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">Diary</p>
-                        <h2 className="mt-3 text-2xl font-semibold text-gray-900">Open My Diary</h2>
+                        <h2 className="mt-3 text-2xl font-semibold text-gray-900">{t('home.diaryCardTitle')}</h2>
                         <p className="mt-3 text-sm leading-6 text-gray-600">
-                            Review your daily entries and keep an eye on your nutrition totals.
+                            {t('home.diaryCardDescription')}
                         </p>
                     </button>
 
@@ -63,9 +65,9 @@ function Home() {
                         className="rounded-3xl border border-gray-200 bg-white p-8 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                     >
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">Products</p>
-                        <h2 className="mt-3 text-2xl font-semibold text-gray-900">Manage Products</h2>
+                        <h2 className="mt-3 text-2xl font-semibold text-gray-900">{t('home.productsCardTitle')}</h2>
                         <p className="mt-3 text-sm leading-6 text-gray-600">
-                            Add new foods to the database so they’re available when you log your meals.
+                            {t('home.productsCardDescription')}
                         </p>
                     </button>
                 </div>

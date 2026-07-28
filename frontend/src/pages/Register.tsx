@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
 
 function Register() {
@@ -8,6 +9,7 @@ function Register() {
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
     const navigate = useNavigate()
+    const { t } = useTranslation()
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -21,19 +23,19 @@ function Register() {
                 navigate('/')
             }
         } catch {
-            setError('Registration failed. Please try again.')
+            setError(t('register.error'))
         }
     }
 
     return (
         <div className="flex min-h-[70vh] items-center justify-center">
             <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-                <h1 className="mb-2 text-2xl font-semibold">Create your account</h1>
-                <p className="mb-6 text-sm text-slate-600">Start your journey with Calorita.</p>
+                <h1 className="mb-2 text-2xl font-semibold">{t('register.title')}</h1>
+                <p className="mb-6 text-sm text-slate-600">{t('register.subtitle')}</p>
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Name</label>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">{t('register.name')}</label>
                         <input
                             type="text"
                             value={name}
@@ -44,7 +46,7 @@ function Register() {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">{t('register.email')}</label>
                         <input
                             type="email"
                             value={email}
@@ -55,7 +57,7 @@ function Register() {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">{t('register.password')}</label>
                         <input
                             type="password"
                             value={password}
@@ -71,7 +73,7 @@ function Register() {
                         type="submit"
                         className="w-full rounded-lg bg-slate-900 px-4 py-2.5 font-medium text-white transition hover:bg-slate-700"
                     >
-                        Create account
+                        {t('register.submit')}
                     </button>
                 </form>
             </div>

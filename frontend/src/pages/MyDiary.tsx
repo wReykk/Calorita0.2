@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
 
 type DiaryEntry = {
@@ -49,6 +50,7 @@ function MyDiary() {
     const [submitting, setSubmitting] = useState(false)
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
     const [editingWeight, setEditingWeight] = useState('')
+    const { t } = useTranslation()
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -60,7 +62,7 @@ function MyDiary() {
                     setProductId(productList[0].id)
                 }
             } catch {
-                setError('Failed to load available products.')
+                setError(t('myDiary.errorLoadProducts'))
             }
         }
 
@@ -83,7 +85,7 @@ function MyDiary() {
 
                 setEntries(filteredEntries)
             } catch {
-                setError('Failed to load your diary entries.')
+                setError(t('myDiary.errorLoadEntries'))
             } finally {
                 setLoading(false)
             }
@@ -118,7 +120,7 @@ function MyDiary() {
         setError('')
 
         if (!productId || !weight) {
-            setError('Please select a product and enter a valid weight.')
+            setError(t('myDiary.errorMissingSelection'))
             return
         }
 
@@ -135,7 +137,7 @@ function MyDiary() {
             setEntries((prev) => [newEntry, ...prev])
             setWeight('')
         } catch {
-            setError('Failed to add the food entry.')
+            setError(t('myDiary.errorAddEntry'))
         } finally {
             setSubmitting(false)
         }
@@ -146,7 +148,7 @@ function MyDiary() {
             await apiClient.delete(`/diary/${entryId}`)
             setEntries((prev) => prev.filter((entry) => entry.id !== entryId))
         } catch {
-            setError('Failed to delete the diary entry.')
+            setError(t('myDiary.errorDeleteEntry'))
         }
     }
 
@@ -169,7 +171,7 @@ function MyDiary() {
             setEditingEntryId(null)
             setEditingWeight('')
         } catch {
-            setError('Failed to update the diary entry.')
+            setError(t('myDiary.errorUpdateEntry'))
         }
     }
 
@@ -178,8 +180,8 @@ function MyDiary() {
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-semibold text-gray-900">My Diary</h1>
-                        <p className="text-sm text-gray-600">Track what you ate and review your daily totals.</p>
+                        <h1 className="text-2xl font-semibold text-gray-900">{t('myDiary.title')}</h1>
+                        <p className="text-sm text-gray-600">{t('myDiary.subtitle')}</p>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -188,7 +190,7 @@ function MyDiary() {
                             onClick={() => changeDay(-1)}
                             className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                         >
-                            Previous Day
+                            {t('myDiary.previousDay')}
                         </button>
                         <input
                             type="date"
@@ -201,19 +203,19 @@ function MyDiary() {
                             onClick={() => changeDay(1)}
                             className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                         >
-                            Next Day
+                            {t('myDiary.nextDay')}
                         </button>
                     </div>
                 </div>
             </div>
 
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-gray-900">Log a food entry</h2>
-                <p className="mt-1 text-sm text-gray-600">Choose a product and enter the portion size in grams.</p>
+                <h2 className="text-lg font-semibold text-gray-900">{t('myDiary.logEntryTitle')}</h2>
+                <p className="mt-1 text-sm text-gray-600">{t('myDiary.logEntrySubtitle')}</p>
 
                 <form onSubmit={handleSubmit} className="mt-4 grid gap-4 md:grid-cols-[1.4fr_0.8fr_auto] md:items-end">
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">Product</label>
+                        <label className="mb-1 block text-sm font-medium text-gray-700">{t('myDiary.product')}</label>
                         <select
                             value={productId}
                             onChange={(event) => setProductId(event.target.value)}
@@ -229,7 +231,7 @@ function MyDiary() {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">Weight (g)</label>
+                        <label className="mb-1 block text-sm font-medium text-gray-700">{t('myDiary.weight')}</label>
                         <input
                             type="number"
                             min="1"
@@ -245,7 +247,7 @@ function MyDiary() {
                         disabled={submitting}
                         className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                        {submitting ? 'Saving...' : 'Add entry'}
+                        {submitting ? t('myDiary.saving') : t('myDiary.save')}
                     </button>
                 </form>
             </div>
@@ -253,13 +255,13 @@ function MyDiary() {
             <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                 <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="mb-4 flex items-center justify-between">
-                        <h2 className="text-lg font-semibold text-gray-900">Consumed products</h2>
+                        <h2 className="text-lg font-semibold text-gray-900">{t('myDiary.consumedProducts')}</h2>
                         <span className="text-sm text-gray-500">{selectedDate}</span>
                     </div>
 
                     {loading ? (
                         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-gray-600">
-                            Loading your diary...
+                            {t('myDiary.loading')}
                         </div>
                     ) : error ? (
                         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -267,15 +269,15 @@ function MyDiary() {
                         </div>
                     ) : entries.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-gray-600">
-                            No entries recorded for this day yet.
+                            {t('myDiary.empty')}
                         </div>
                     ) : (
                         <ul className="space-y-3">
                             {entries.map((entry) => (
                                 <li key={entry.id} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4">
                                     <div>
-                                        <p className="font-medium text-gray-900">{entry.product?.name || 'Unnamed product'}</p>
-                                        <p className="text-sm text-gray-600">{entry.amount}g consumed</p>
+                                        <p className="font-medium text-gray-900">{entry.product?.name || t('myDiary.unnamedProduct')}</p>
+                                        <p className="text-sm text-gray-600">{t('myDiary.consumedLabel', { amount: entry.amount })}</p>
                                     </div>
                                     <div className="flex items-center gap-3 text-right text-sm text-gray-600">
                                         <div>
@@ -296,7 +298,7 @@ function MyDiary() {
                                                     onClick={() => handleEditSave(entry.id)}
                                                     className="rounded-full bg-slate-900 px-3 py-1 text-sm font-medium text-white transition hover:bg-slate-700"
                                                 >
-                                                    Save
+                                                    {t('myDiary.saveChanges')}
                                                 </button>
                                             </div>
                                         ) : (
@@ -306,14 +308,14 @@ function MyDiary() {
                                                     onClick={() => handleEditStart(entry)}
                                                     className="rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                                                 >
-                                                    Edit
+                                                    {t('myDiary.edit')}
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => handleDelete(entry.id)}
                                                     className="rounded-full border border-red-200 px-3 py-1 text-sm font-medium text-red-600 transition hover:bg-red-50"
                                                 >
-                                                    Delete
+                                                    {t('myDiary.delete')}
                                                 </button>
                                             </div>
                                         )}
@@ -325,24 +327,24 @@ function MyDiary() {
                 </div>
 
                 <div className="rounded-3xl border border-slate-200 bg-slate-900 p-6 text-white shadow-sm">
-                    <h2 className="text-lg font-semibold">Daily summary</h2>
-                    <p className="mt-2 text-sm text-slate-300">Your nutrition totals for this day.</p>
+                    <h2 className="text-lg font-semibold" style={{ color: '#ffffff' }}>{t('myDiary.dailySummary')}</h2>
+                    <p className="mt-2 text-sm text-slate-300 " >{t('myDiary.dailySummarySubtitle')}</p>
 
                     <div className="mt-6 grid gap-3">
                         <div className="rounded-2xl bg-white/10 p-4">
-                            <p className="text-sm text-slate-300">Calories</p>
-                            <p className="text-2xl font-semibold">{summary.totalCalories.toFixed(0)} kcal</p>
+                            <p className="text-sm text-slate-300">{t('myDiary.calories')}</p>
+                            <p className="text-2xl font-semibold">{t('myDiary.kcalLabel', { amount: summary.totalCalories.toFixed(0) })}</p>
                         </div>
                         <div className="rounded-2xl bg-white/10 p-4">
-                            <p className="text-sm text-slate-300">Protein</p>
+                            <p className="text-sm text-slate-300">{t('myDiary.protein')}</p>
                             <p className="text-2xl font-semibold">{summary.totalProtein.toFixed(1)} g</p>
                         </div>
                         <div className="rounded-2xl bg-white/10 p-4">
-                            <p className="text-sm text-slate-300">Fat</p>
+                            <p className="text-sm text-slate-300">{t('myDiary.fat')}</p>
                             <p className="text-2xl font-semibold">{summary.totalFat.toFixed(1)} g</p>
                         </div>
                         <div className="rounded-2xl bg-white/10 p-4">
-                            <p className="text-sm text-slate-300">Carbs</p>
+                            <p className="text-sm text-slate-300">{t('myDiary.carbs')}</p>
                             <p className="text-2xl font-semibold">{summary.totalCarbs.toFixed(1)} g</p>
                         </div>
                     </div>

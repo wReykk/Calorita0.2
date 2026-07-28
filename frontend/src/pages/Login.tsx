@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
 
 function Login() {
@@ -7,6 +8,7 @@ function Login() {
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
     const navigate = useNavigate()
+    const { t } = useTranslation()
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -35,7 +37,7 @@ function Login() {
                 navigate('/')
             }
         } catch {
-            setError('Login failed. Please check your credentials.')
+            setError(t('login.error'))
         }
     }
 
@@ -46,16 +48,16 @@ function Login() {
                     <div className="mb-8">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">Calorita</p>
                         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
-                            Welcome back
+                            {t('login.title')}
                         </h1>
                         <p className="mt-2 text-sm leading-6 text-gray-500 sm:text-base">
-                            Sign in to continue tracking your meals and progress.
+                            {t('login.subtitle')}
                         </p>
                     </div>
 
                     <form className="space-y-4" onSubmit={handleSubmit}>
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-gray-700">Email</label>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">{t('login.email')}</label>
                             <input
                                 type="email"
                                 value={email}
@@ -66,7 +68,7 @@ function Login() {
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-gray-700">Password</label>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">{t('login.password')}</label>
                             <input
                                 type="password"
                                 value={password}
@@ -86,7 +88,7 @@ function Login() {
                             type="submit"
                             className="w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800"
                         >
-                            Sign in
+                            {t('login.submit')}
                         </button>
                     </form>
                 </div>
