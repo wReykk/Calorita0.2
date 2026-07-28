@@ -15,6 +15,8 @@ router.get('/', controller.getEntries);
 
 router.post('/', validate(addDiaryEntrySchema), controller.addEntry);
 
+router.put('/:id', controller.updateEntry);
+
 router.delete('/:id', controller.deleteEntry);
 
 export default router;

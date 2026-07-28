@@ -28,6 +28,45 @@ export class DiaryService {
         });
     }
 
+    public async updateEntry(id: string, userId: string, data: { weight?: number; amount?: number }) {
+        const weight = typeof data.weight === 'number' ? data.weight : data.amount;
+
+        if (typeof weight !== 'number' || weight <= 0) {
+            throw new Error('Weight must be a positive number');
+        }
+
+        const existingEntry = await prisma.diaryEntry.findFirst({
+            where: { id, userId },
+            include: { product: true }
+        });
+
+        if (!existingEntry) {
+            return null;
+        }
+
+        const multiplier = weight / 100;
+        const calories = (existingEntry.product.calories ?? 0) * multiplier;
+        const protein = (existingEntry.product.protein ?? 0) * multiplier;
+        const fat = (existingEntry.product.fat ?? 0) * multiplier;
+        const carbs = (existingEntry.product.carbs ?? 0) * multiplier;
+
+        const updatedEntry = await prisma.diaryEntry.update({
+            where: { id, userId },
+            data: { amount: weight },
+            include: { product: true }
+        });
+
+        return {
+            ...updatedEntry,
+            nutrition: {
+                calories: Number(calories.toFixed(2)),
+                protein: Number(protein.toFixed(2)),
+                fat: Number(fat.toFixed(2)),
+                carbs: Number(carbs.toFixed(2)),
+            }
+        };
+    }
+
     public async deleteEntry(id: string, userId: string) {
         await prisma.diaryEntry.delete({
             where: { id, userId }

@@ -28,6 +28,29 @@ export class DiaryController {
         }
     };
 
+    public updateEntry = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const id = req.params.id as string;
+            const userId = req.userId as string;
+            const weight = typeof req.body.weight === 'number'
+                ? req.body.weight
+                : typeof req.body.amount === 'number'
+                    ? req.body.amount
+                    : undefined;
+
+            const updatedEntry = await diaryService.updateEntry(id, userId, { weight });
+
+            if (!updatedEntry) {
+                res.status(404).json({ message: 'Diary entry not found' });
+                return;
+            }
+
+            res.status(200).json(updatedEntry);
+        } catch (error) {
+            next(error);
+        }
+    };
+
     public deleteEntry = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = req.params.id as string;
