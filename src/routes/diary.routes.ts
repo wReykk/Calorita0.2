@@ -9,6 +9,8 @@ const controller = new DiaryController();
 
 router.use(authenticate);
 
+router.get('/summary', controller.getDailySummary);
+
 router.get('/', controller.getEntries);
 
 router.post('/', validate(addDiaryEntrySchema), controller.addEntry);

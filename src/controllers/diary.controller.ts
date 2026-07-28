@@ -40,4 +40,17 @@ export class DiaryController {
             next(error);
         }
     };
+
+    public getDailySummary = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const userId = req.userId as string;
+            const { date } = req.query;
+
+            const summary = await diaryService.getDailySummary(userId, date as string);
+
+            res.status(200).json(summary);
+        } catch (error) {
+            next(error);
+        }
+    };
 }
