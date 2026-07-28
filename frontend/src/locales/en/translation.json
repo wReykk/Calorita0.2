@@ -7,16 +7,21 @@
         "register": "Register",
         "logout": "Logout",
         "loggedIn": "Logged in",
-        "hi": "Hi, {{name}}"
+        "hi": "Hi, {{name}}",
+        "languageEnglish": "EN",
+        "languageUkrainian": "UK"
     },
     "home": {
         "title": "Track your meals with clarity.",
         "description": "A calm, focused way to log what you eat, review your daily nutrition, and stay on top of your goals.",
         "cta": "Get Started",
+        "welcomeBackSubtitle": "Nice to see you again",
         "welcomeBackTitle": "Welcome back!",
         "welcomeBackDescription": "Continue where you left off and keep your nutrition routine moving forward.",
+        "diaryLabel": "Diary",
         "diaryCardTitle": "Open My Diary",
         "diaryCardDescription": "Review your daily entries and keep an eye on your nutrition totals.",
+        "productsLabel": "Products",
         "productsCardTitle": "Manage Products",
         "productsCardDescription": "Add new foods to the database so they’re available when you log your meals."
     },
@@ -63,6 +68,9 @@
         "consumedLabel": "{{amount}}g consumed",
         "kcalLabel": "{{amount}} kcal",
         "proteinLabel": "{{amount}}g protein",
+        "proteinValue": "{{amount}} g",
+        "fatValue": "{{amount}} g",
+        "carbsValue": "{{amount}} g",
         "errorLoadProducts": "Failed to load available products.",
         "errorLoadEntries": "Failed to load your diary entries.",
         "errorMissingSelection": "Please select a product and enter a valid weight.",
@@ -74,6 +82,8 @@
     "products": {
         "title": "Your Products",
         "subtitle": "Add a product and manage your nutrition list.",
+        "tipValue": "TIP",
+        "tip": "Always enter nutritional values calculated per 100g (or 100ml) of the product. When logging items to your diary, you can specify your exact portion size in grams. For individual items (like eggs or a piece of fruit), you can create them as '1 piece' and set the weight of that single item in grams (e.g., 1 egg = 50g).",
         "name": "Name",
         "calories": "Calories",
         "protein": "Protein",
@@ -86,9 +96,17 @@
         "delete": "Delete",
         "save": "Save",
         "cancel": "Cancel",
+        "placeholderCalories": "Calories",
+        "placeholderProtein": "Protein",
+        "placeholderFat": "Fat",
+        "placeholderCarbs": "Carbs",
         "errorLoad": "Failed to load products.",
         "errorCreate": "Failed to create product.",
         "errorDelete": "Failed to delete product.",
-        "errorUpdate": "Failed to update product."
+        "errorUpdate": "Failed to update product.",
+        "kcalLabel": "{{amount}} kcal",
+        "proteinValue": "{{amount}} g",
+        "fatValue": "{{amount}} g",
+        "carbsValue": "{{amount}} g"
     }
 }

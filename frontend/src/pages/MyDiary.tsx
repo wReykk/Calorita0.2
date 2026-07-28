@@ -39,6 +39,18 @@ function parseDateInput(value: string) {
     return new Date(year, month - 1, day)
 }
 
+function getConsumedNutrition(entry: DiaryEntry) {
+    const multiplier = (entry.amount || 0) / 100
+    const product = entry.product
+
+    return {
+        calories: Math.round((product?.calories || 0) * multiplier),
+        protein: Number((product?.protein || 0) * multiplier).toFixed(1),
+        fat: Number((product?.fat || 0) * multiplier).toFixed(1),
+        carbs: Number((product?.carbs || 0) * multiplier).toFixed(1),
+    }
+}
+
 function MyDiary() {
     const [selectedDate, setSelectedDate] = useState(() => formatDateInput(new Date()))
     const [entries, setEntries] = useState<DiaryEntry[]>([])
@@ -50,7 +62,10 @@ function MyDiary() {
     const [submitting, setSubmitting] = useState(false)
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
     const [editingWeight, setEditingWeight] = useState('')
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
+    const isUkrainian = i18n.language?.startsWith('uk') ?? false
+    const unitG = isUkrainian ? 'г' : 'g'
+    const unitKcal = isUkrainian ? 'ккал' : 'kcal'
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -273,55 +288,77 @@ function MyDiary() {
                         </div>
                     ) : (
                         <ul className="space-y-3">
-                            {entries.map((entry) => (
-                                <li key={entry.id} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                                    <div>
-                                        <p className="font-medium text-gray-900">{entry.product?.name || t('myDiary.unnamedProduct')}</p>
-                                        <p className="text-sm text-gray-600">{t('myDiary.consumedLabel', { amount: entry.amount })}</p>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-right text-sm text-gray-600">
-                                        <div>
-                                            <p>{Math.round((entry.product?.calories || 0) * (entry.amount / 100))} kcal</p>
-                                            <p>{entry.product?.protein || 0}g protein</p>
+                            {entries.map((entry) => {
+                                const nutrition = getConsumedNutrition(entry)
+
+                                return (
+                                    <li key={entry.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                        <div className="flex flex-col gap-3">
+                                            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="break-words font-medium text-gray-900">{entry.product?.name || t('myDiary.unnamedProduct')}</p>
+                                                    <p className="mt-1 text-sm text-gray-600">{t('myDiary.consumedLabel', { amount: entry.amount })}</p>
+                                                </div>
+
+                                                {editingEntryId === entry.id ? (
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            value={editingWeight}
+                                                            onChange={(event) => setEditingWeight(event.target.value)}
+                                                            className="w-20 rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-slate-500"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleEditSave(entry.id)}
+                                                            className="rounded-full bg-slate-900 px-3 py-1 text-sm font-medium text-white transition hover:bg-slate-700"
+                                                        >
+                                                            {t('myDiary.saveChanges')}
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleEditStart(entry)}
+                                                            className="rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                                                        >
+                                                            {t('myDiary.edit')}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDelete(entry.id)}
+                                                            className="rounded-full border border-red-200 px-3 py-1 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                                                        >
+                                                            {t('myDiary.delete')}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+                                                <div className="min-w-[110px] flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">{t('myDiary.calories')}</p>
+                                                    <p className="mt-1 font-semibold text-slate-900">{nutrition.calories} {unitKcal}</p>
+                                                </div>
+                                                <div className="min-w-[110px] flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">{t('myDiary.protein')}</p>
+                                                    <p className="mt-1 font-semibold text-slate-900">{nutrition.protein} {unitG}</p>
+                                                </div>
+                                                <div className="min-w-[110px] flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">{t('myDiary.fat')}</p>
+                                                    <p className="mt-1 font-semibold text-slate-900">{nutrition.fat} {unitG}</p>
+                                                </div>
+                                                <div className="min-w-[110px] flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">{t('myDiary.carbs')}</p>
+                                                    <p className="mt-1 font-semibold text-slate-900">{nutrition.carbs} {unitG}</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        {editingEntryId === entry.id ? (
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    value={editingWeight}
-                                                    onChange={(event) => setEditingWeight(event.target.value)}
-                                                    className="w-20 rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-slate-500"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleEditSave(entry.id)}
-                                                    className="rounded-full bg-slate-900 px-3 py-1 text-sm font-medium text-white transition hover:bg-slate-700"
-                                                >
-                                                    {t('myDiary.saveChanges')}
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleEditStart(entry)}
-                                                    className="rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                                                >
-                                                    {t('myDiary.edit')}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleDelete(entry.id)}
-                                                    className="rounded-full border border-red-200 px-3 py-1 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                                                >
-                                                    {t('myDiary.delete')}
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </li>
-                            ))}
+                                    </li>
+                                )
+                            })}
                         </ul>
                     )}
                 </div>
@@ -337,15 +374,15 @@ function MyDiary() {
                         </div>
                         <div className="rounded-2xl bg-white/10 p-4">
                             <p className="text-sm text-slate-300">{t('myDiary.protein')}</p>
-                            <p className="text-2xl font-semibold">{summary.totalProtein.toFixed(1)} g</p>
+                            <p className="text-2xl font-semibold">{t('myDiary.proteinValue', { amount: summary.totalProtein.toFixed(1) })}</p>
                         </div>
                         <div className="rounded-2xl bg-white/10 p-4">
                             <p className="text-sm text-slate-300">{t('myDiary.fat')}</p>
-                            <p className="text-2xl font-semibold">{summary.totalFat.toFixed(1)} g</p>
+                            <p className="text-2xl font-semibold">{t('myDiary.fatValue', { amount: summary.totalFat.toFixed(1) })}</p>
                         </div>
                         <div className="rounded-2xl bg-white/10 p-4">
                             <p className="text-sm text-slate-300">{t('myDiary.carbs')}</p>
-                            <p className="text-2xl font-semibold">{summary.totalCarbs.toFixed(1)} g</p>
+                            <p className="text-2xl font-semibold">{t('myDiary.carbsValue', { amount: summary.totalCarbs.toFixed(1) })}</p>
                         </div>
                     </div>
                 </div>

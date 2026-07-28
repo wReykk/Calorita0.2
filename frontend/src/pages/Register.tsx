@@ -30,8 +30,15 @@ function Register() {
     return (
         <div className="flex min-h-[70vh] items-center justify-center">
             <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-                <h1 className="mb-2 text-2xl font-semibold">{t('register.title')}</h1>
-                <p className="mb-6 text-sm text-slate-600">{t('register.subtitle')}</p>
+                <div className="mb-8">
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">Calorita</p>
+                    <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+                        {t('register.title')}
+                    </h1>
+                    <p className="mt-2 text-sm leading-6 text-gray-500 sm:text-base">
+                        {t('register.subtitle')}
+                    </p>
+                </div>
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>

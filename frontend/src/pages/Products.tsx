@@ -130,6 +130,8 @@ function Products() {
                 <div>
                     <h1 className="text-2xl font-semibold">{t('products.title')}</h1>
                     <p className="text-sm text-slate-600">{t('products.subtitle')}</p>
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-gray-500 mt-5 mb-2">{t('products.tipValue')}</h3>
+                    <p className="text-sm text-slate-600 mb-3">{t('products.tip')}</p>
                 </div>
             </div>
 
@@ -256,7 +258,7 @@ function Products() {
                                                     value={editState.values.calories}
                                                     onChange={(event) => setEditState((prev) => ({ ...prev, values: { ...prev.values, calories: event.target.value } }))}
                                                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
-                                                    placeholder="Calories"
+                                                    placeholder={t('products.placeholderCalories')}
                                                     required
                                                 />
                                                 <input
@@ -265,7 +267,7 @@ function Products() {
                                                     value={editState.values.protein}
                                                     onChange={(event) => setEditState((prev) => ({ ...prev, values: { ...prev.values, protein: event.target.value } }))}
                                                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
-                                                    placeholder="Protein"
+                                                    placeholder={t('products.placeholderProtein')}
                                                     required
                                                 />
                                             </div>
@@ -276,7 +278,7 @@ function Products() {
                                                     value={editState.values.fat}
                                                     onChange={(event) => setEditState((prev) => ({ ...prev, values: { ...prev.values, fat: event.target.value } }))}
                                                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
-                                                    placeholder="Fat"
+                                                    placeholder={t('products.placeholderFat')}
                                                     required
                                                 />
                                                 <input
@@ -285,7 +287,7 @@ function Products() {
                                                     value={editState.values.carbs}
                                                     onChange={(event) => setEditState((prev) => ({ ...prev, values: { ...prev.values, carbs: event.target.value } }))}
                                                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
-                                                    placeholder="Carbs"
+                                                    placeholder={t('products.placeholderCarbs')}
                                                     required
                                                 />
                                             </div>
@@ -312,19 +314,19 @@ function Products() {
                                 <div className="grid grid-cols-2 gap-2 text-sm text-slate-600">
                                     <div className="rounded-lg bg-slate-50 p-2">
                                         <p className="text-xs uppercase tracking-wide text-slate-400">{t('products.calories')}</p>
-                                        <p className="font-medium text-slate-900">{product.calories ?? 0}</p>
+                                        <p className="font-medium text-slate-900">{t('products.kcalLabel', { amount: product.calories ?? 0 })}</p>
                                     </div>
                                     <div className="rounded-lg bg-slate-50 p-2">
                                         <p className="text-xs uppercase tracking-wide text-slate-400">{t('products.protein')}</p>
-                                        <p className="font-medium text-slate-900">{product.protein ?? 0}g</p>
+                                        <p className="font-medium text-slate-900">{t('products.proteinValue', { amount: product.protein ?? 0 })}</p>
                                     </div>
                                     <div className="rounded-lg bg-slate-50 p-2">
                                         <p className="text-xs uppercase tracking-wide text-slate-400">{t('products.fat')}</p>
-                                        <p className="font-medium text-slate-900">{product.fat ?? 0}g</p>
+                                        <p className="font-medium text-slate-900">{t('products.fatValue', { amount: product.fat ?? 0 })}</p>
                                     </div>
                                     <div className="rounded-lg bg-slate-50 p-2">
                                         <p className="text-xs uppercase tracking-wide text-slate-400">{t('products.carbs')}</p>
-                                        <p className="font-medium text-slate-900">{product.carbs ?? 0}g</p>
+                                        <p className="font-medium text-slate-900">{t('products.carbsValue', { amount: product.carbs ?? 0 })}</p>
                                     </div>
                                 </div>
                             </div>
