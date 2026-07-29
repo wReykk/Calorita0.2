@@ -54,7 +54,7 @@ function Products() {
         }
 
         fetchProducts()
-    }, [])
+    }, [t])
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
