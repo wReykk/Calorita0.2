@@ -57,7 +57,7 @@ model User {
 
   dateOfBirth DateTime?
   sex Sex?
-  heigth Float?
+  height Float?
   weight Float?
   activityLevel ActivityLevel?
   goal Goal?
