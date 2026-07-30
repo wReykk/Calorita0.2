@@ -257,52 +257,54 @@ function MyDiary() {
                 </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-gray-900">{t('myDiary.logEntryTitle')}</h2>
-                <p className="mt-1 text-sm text-gray-600">{t('myDiary.logEntrySubtitle')}</p>
 
-                <form onSubmit={handleSubmit} className="mt-4 grid gap-4 md:grid-cols-[1.4fr_0.8fr_auto] md:items-end">
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">{t('myDiary.product')}</label>
-                        <select
-                            value={productId}
-                            onChange={(event) => setProductId(event.target.value)}
-                            className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
-                            required
-                        >
-                            {products.map((product) => (
-                                <option key={product.id} value={product.id}>
-                                    {product.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">{t('myDiary.weight')}</label>
-                        <input
-                            type="number"
-                            min="1"
-                            value={weight}
-                            onChange={(event) => setWeight(event.target.value)}
-                            className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
-                            required
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={submitting}
-                        className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                        {submitting ? t('myDiary.saving') : t('myDiary.save')}
-                    </button>
-                </form>
-            </div>
 
             <div className="grid gap-6">
                 <div className="space-y-4">
                     <DailyProgress targetMacros={targetMacros} consumedMacros={consumedMacros} />
+
+                    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <h2 className="text-lg font-semibold text-gray-900">{t('myDiary.logEntryTitle')}</h2>
+                        <p className="mt-1 text-sm text-gray-600">{t('myDiary.logEntrySubtitle')}</p>
+
+                        <form onSubmit={handleSubmit} className="mt-4 grid gap-4 md:grid-cols-[1.4fr_0.8fr_auto] md:items-end">
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-gray-700">{t('myDiary.product')}</label>
+                                <select
+                                    value={productId}
+                                    onChange={(event) => setProductId(event.target.value)}
+                                    className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
+                                    required
+                                >
+                                    {products.map((product) => (
+                                        <option key={product.id} value={product.id}>
+                                            {product.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-gray-700">{t('myDiary.weight')}</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={weight}
+                                    onChange={(event) => setWeight(event.target.value)}
+                                    className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={submitting}
+                                className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-70"
+                            >
+                                {submitting ? t('myDiary.saving') : t('myDiary.save')}
+                            </button>
+                        </form>
+                    </div>
 
                     <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                         <div className="mb-4 flex items-center justify-between">
@@ -424,6 +426,7 @@ function MyDiary() {
                     </div>
                 </div> */}
             </div>
+
         </div>
     )
 }

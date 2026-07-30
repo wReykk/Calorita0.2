@@ -83,7 +83,7 @@ function DailyProgress({ targetMacros, consumedMacros }: DailyProgressProps) {
                         <div className="flex flex-col gap-1 ml-4">
                             <p className="text-sm font-medium text-slate-600">Calories</p>
                             <p className="text-xl font-semibold text-slate-900">
-                                {caloriesConsumed} / {caloriesTarget} kcal
+                                {(caloriesConsumed).toFixed(0)} / {caloriesTarget} kcal
                             </p>
                             <p className={`mt-1 text-sm font-medium ${caloriesOver ? 'text-amber-600' : 'text-slate-600'}`}>
                                 {caloriesOver ? `Over by ${Math.abs(caloriesTarget - caloriesConsumed)} kcal` : `${caloriesRemaining} kcal remaining`}
