@@ -151,6 +151,7 @@ function Products() {
                         <label className="mb-1 block text-sm font-medium text-slate-700">{t('products.calories')}</label>
                         <input
                             type="number"
+                            step="0.1"
                             min="0"
                             value={form.calories}
                             onChange={(event) => setForm((prev) => ({ ...prev, calories: event.target.value }))}
@@ -163,6 +164,7 @@ function Products() {
                         <label className="mb-1 block text-sm font-medium text-slate-700">{t('products.protein')}</label>
                         <input
                             type="number"
+                            step="0.1"
                             min="0"
                             value={form.protein}
                             onChange={(event) => setForm((prev) => ({ ...prev, protein: event.target.value }))}
@@ -175,6 +177,7 @@ function Products() {
                         <label className="mb-1 block text-sm font-medium text-slate-700">{t('products.fat')}</label>
                         <input
                             type="number"
+                            step="0.1"
                             min="0"
                             value={form.fat}
                             onChange={(event) => setForm((prev) => ({ ...prev, fat: event.target.value }))}
@@ -187,6 +190,7 @@ function Products() {
                         <label className="mb-1 block text-sm font-medium text-slate-700">{t('products.carbs')}</label>
                         <input
                             type="number"
+                            step="0.1"
                             min="0"
                             value={form.carbs}
                             onChange={(event) => setForm((prev) => ({ ...prev, carbs: event.target.value }))}

@@ -20,6 +20,14 @@ function Login() {
             if (response.data?.token) {
                 localStorage.setItem('token', response.data.token)
 
+                if (response.data?.user?.id) {
+                    localStorage.setItem('userId', response.data.user.id)
+                    localStorage.setItem('user', JSON.stringify(response.data.user))
+                } else {
+                    localStorage.removeItem('userId')
+                    localStorage.removeItem('user')
+                }
+
                 const savedUsername =
                     response.data?.user?.name ||
                     response.data?.user?.email ||
