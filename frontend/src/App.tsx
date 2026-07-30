@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import MyDiary from './pages/MyDiary'
 import Products from './pages/Products'
 import Register from './pages/Register'
+import UserProfile from './pages/UserProfile'
 import i18n from './i18n'
 
 function Layout() {
@@ -62,10 +63,14 @@ function Layout() {
                 <Link to="/products" className="text-slate-600 transition hover:text-slate-900">
                   {t('navbar.products')}
                 </Link>
-                <span className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">
+                <button
+                  type="button"
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700 transition hover:bg-emerald-100"
+                >
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                   {username ? t('navbar.hi', { name: username }) : t('navbar.loggedIn')}
-                </span>
+                </button>
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -96,6 +101,7 @@ function Layout() {
           <Route element={<ProtectedRoute />}>
             <Route path="/products" element={<Products />} />
             <Route path="/diary" element={<MyDiary />} />
+            <Route path="/profile" element={<UserProfile />} />
           </Route>
         </Routes>
       </main>

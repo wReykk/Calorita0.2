@@ -162,7 +162,7 @@ function UserSettingsForm() {
     return (
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
             <div className="mb-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Settings</p>
+                {/* <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Settings</p> */}
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">Update your body metrics</h2>
                 <p className="my-5 text-sm leading-6 text-slate-600">
                     Add your current measurements and goals so Calorita can tailor your daily nutrition plan.

@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import UserSettingsForm from '../components/UserSettingsForm'
 
 function Home() {
     const navigate = useNavigate()
@@ -73,9 +72,6 @@ function Home() {
                     </button>
                 </div>
 
-                <div className="mt-8 max-w-4xl mx-auto w-full">
-                    <UserSettingsForm />
-                </div>
             </div>
         </div>
     )
