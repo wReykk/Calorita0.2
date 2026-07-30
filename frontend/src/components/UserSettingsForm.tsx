@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useState, type ChangeEvent, type FormEvent } from 'react'
 import apiClient from '../assets/api/client'
 
 type FormState = {
@@ -91,16 +91,6 @@ function UserSettingsForm() {
         const storedUser = getStoredUser()
         return storedUser?.updatedAt ? formatDisplayDate(storedUser.updatedAt) : null
     })
-
-    useEffect(() => {
-        const storedUser = getStoredUser()
-        if (!storedUser) {
-            return
-        }
-
-        setForm(getInitialFormState())
-        setLastUpdated(storedUser.updatedAt ? formatDisplayDate(storedUser.updatedAt) : null)
-    }, [])
 
     const handleChange = (field: keyof FormState) => (
         event: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
