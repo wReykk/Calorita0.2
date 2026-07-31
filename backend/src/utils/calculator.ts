@@ -8,7 +8,7 @@ interface UserParams {
     activityLevel: ActivityLevel,
     goal: Goal,
     pace: Pace,
-    targetWeight?: number
+    targetWeight?: number | null
 }
 
 export function calculateMacros(params: UserParams) {

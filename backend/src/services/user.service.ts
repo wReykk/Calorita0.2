@@ -10,9 +10,9 @@ const calculateAge = (dob: string | Date) => {
 };
 
 export const updateUserParameters = async (id: string, data: any) => {
-    const { weight, height, dateOfBirth, sex, activityLevel, goal } = data;
+    const { weight, height, dateOfBirth, sex, activityLevel, goal, pace, targetWeight } = data;
 
-    if (!weight || !height || !dateOfBirth || !sex || !activityLevel || !goal) {
+    if (!weight || !height || !dateOfBirth || !sex || !activityLevel || !goal || !pace) {
         throw new Error('MISSING_DATA');
     }
 
@@ -25,17 +25,21 @@ export const updateUserParameters = async (id: string, data: any) => {
         sex,
         activityLevel,
         goal,
+        pace,
+        targetWeight: targetWeight ? Number(targetWeight) : null
     });
 
     const updatedUser = await prisma.user.update({
         where: { id },
         data: {
             weight: Number(weight),
+            targetWeigth: targetWeight ? Number(targetWeight) : null,
             height: Number(height),
             dateOfBirth: new Date(dateOfBirth),
             sex,
             activityLevel,
             goal,
+            pace,
             dailyCalories: macros.dailyCalories,
             dailyProtein: macros.dailyProtein,
             dailyFat: macros.dailyFat,
@@ -43,5 +47,8 @@ export const updateUserParameters = async (id: string, data: any) => {
         },
     });
 
-    return updatedUser;
+    return {
+        ...updatedUser,
+        estimatedWeeksToGoal: macros.estimatedWeeksToGoal
+    };
 };
