@@ -32,6 +32,12 @@ enum Goal {
   GAIN
 }
 
+enum Pace {
+  EASY
+  MEDIUM
+  HARD
+}
+
 
 model Product {
   id          String   @id @default(uuid())
@@ -61,6 +67,8 @@ model User {
   weight Float?
   activityLevel ActivityLevel?
   goal Goal?
+  targetWeigth Float?
+  pace Pace? @default(MEDIUM)
 
   dailyCalories Int?
   dailyProtein  Float?
