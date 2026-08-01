@@ -12,6 +12,12 @@ type FormState = {
     pace: 'EASY' | 'MEDIUM' | 'HARD'
 }
 
+type UserSettingsFormProps = {
+    isOnboarding?: boolean
+    onSubmitSuccess?: () => void
+    submitLabel?: string
+}
+
 const initialFormState: FormState = {
     height: '',
     weight: '',
@@ -96,7 +102,7 @@ const getInitialFormState = (): FormState => {
     return buildFormStateFromUser(storedUser)
 }
 
-function UserSettingsForm() {
+function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel = 'Save settings' }: UserSettingsFormProps) {
     const [form, setForm] = useState<FormState>(() => getInitialFormState())
     const [isSaving, setIsSaving] = useState(false)
     const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -252,8 +258,16 @@ function UserSettingsForm() {
                 message:
                     estimatedWeeksToGoal !== null && estimatedWeeksToGoal !== undefined
                         ? `Settings saved! Estimated time to reach your goal: ${estimatedWeeksToGoal} weeks.`
-                        : 'Settings saved successfully!',
+                        : isOnboarding
+                            ? 'Settings saved successfully! Redirecting...'
+                            : 'Settings saved successfully!',
             })
+
+            if (isOnboarding) {
+                window.setTimeout(() => {
+                    onSubmitSuccess?.()
+                }, 1200)
+            }
         } catch {
             setFeedback({ type: 'error', message: 'Unable to save your settings right now.' })
         } finally {
@@ -265,9 +279,13 @@ function UserSettingsForm() {
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
             <div className="mb-6">
                 {/* <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Settings</p> */}
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">Update your body metrics</h2>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+                    {isOnboarding ? 'Complete your profile' : 'Update your body metrics'}
+                </h2>
                 <p className="my-5 text-sm leading-6 text-slate-600">
-                    Add your current measurements and goals so Calorita can tailor your daily nutrition plan.
+                    {isOnboarding
+                        ? 'Fill in your measurements and goals so Calorita can personalize your plan.'
+                        : 'Add your current measurements and goals so Calorita can tailor your daily nutrition plan.'}
                 </p>
                 {lastUpdated ? (
                     <p className="mt-5 text-sm text-gray-500">Last updated: {lastUpdated}</p>
@@ -427,7 +445,7 @@ function UserSettingsForm() {
                     disabled={isSubmitDisabled}
                     className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                    {isSaving ? 'Saving...' : 'Save settings'}
+                    {isSaving ? 'Saving...' : submitLabel}
                 </button>
             </form>
         </div>

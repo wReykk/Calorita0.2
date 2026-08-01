@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import MyDiary from './pages/MyDiary'
+import Onboarding from './pages/Onboarding'
 import Products from './pages/Products'
 import Register from './pages/Register'
 import UserProfile from './pages/UserProfile'
@@ -98,6 +99,7 @@ function Layout() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/products" element={<Products />} />
             <Route path="/diary" element={<MyDiary />} />

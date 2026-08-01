@@ -8,24 +8,48 @@ function Register() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
+    const [successMessage, setSuccessMessage] = useState('')
     const navigate = useNavigate()
     const { t } = useTranslation()
+
+    const persistAuthState = (token: string, user: Record<string, unknown>) => {
+        localStorage.setItem('token', token)
+        localStorage.setItem('user', JSON.stringify(user))
+
+        if (user.id) {
+            localStorage.setItem('userId', String(user.id))
+        }
+    }
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         setError('')
+        setSuccessMessage('')
 
         try {
-            const response = await apiClient.post('/auth/register', { name, email, password })
+            const registerResponse = await apiClient.post('/auth/register', { name, email, password })
+            const registerData = registerResponse.data
 
-            if (response.data?.token) {
-                localStorage.setItem('token', response.data.token)
-                if (response.data?.id) {
-                    localStorage.setItem('user', JSON.stringify(response.data))
-                    localStorage.setItem('userId', response.data.id)
+            if (registerData?.token) {
+                persistAuthState(registerData.token, registerData)
+            } else {
+                const loginResponse = await apiClient.post('/auth/login', { email, password })
+                const loginData = loginResponse.data
+                const user = loginData?.user
+                const token = loginData?.token
+
+                if (token && user) {
+                    persistAuthState(token, user)
+                } else {
+                    throw new Error('Unable to authenticate user after registration')
                 }
-                navigate('/')
             }
+
+            setSuccessMessage('User registered successfully! Redirecting...')
+
+            window.setTimeout(() => {
+                navigate('/onboarding', { replace: true })
+            }, 2000)
         } catch {
             setError(t('register.error'))
         }
@@ -79,10 +103,11 @@ function Register() {
                     </div>
 
                     {error ? <p className="text-sm text-red-600">{error}</p> : null}
+                    {successMessage ? <p className="text-sm text-emerald-600 my-3">{successMessage}</p> : null}
 
                     <button
                         type="submit"
-                        className="w-full rounded-lg bg-slate-900 px-4 py-2.5 font-medium text-white transition hover:bg-slate-700"
+                        className="w-full rounded-lg bg-slate-900 px-4 py-2.5 mt-3 font-medium text-white transition hover:bg-slate-700"
                     >
                         {t('register.submit')}
                     </button>
