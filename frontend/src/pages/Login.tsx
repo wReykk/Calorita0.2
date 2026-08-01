@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
+import { usePageTitle } from '../hooks/usePageTitle.js'
 
 function Login() {
     const [email, setEmail] = useState('')
@@ -9,6 +10,7 @@ function Login() {
     const [error, setError] = useState('')
     const navigate = useNavigate()
     const { t } = useTranslation()
+    usePageTitle(t('home.pageTitle', 'Log In'))
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()

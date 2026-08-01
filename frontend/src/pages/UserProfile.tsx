@@ -1,8 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 import UserSettingsForm from '../components/UserSettingsForm'
+import { usePageTitle } from '../hooks/usePageTitle.js'
+import { useTranslation } from 'react-i18next'
 
 function UserProfile() {
     const navigate = useNavigate()
+    const { t } = useTranslation()
+    usePageTitle(t('home.pageTitle', 'Profile'))
 
     return (
         <div className="min-h-[80vh] bg-gray-50 px-4 pb-8 sm:px-6 lg:px-8">

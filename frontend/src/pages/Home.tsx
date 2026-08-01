@@ -1,10 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { usePageTitle } from '../hooks/usePageTitle.js'
 
 function Home() {
+
     const navigate = useNavigate()
     const { t } = useTranslation()
     const isLoggedIn = Boolean(localStorage.getItem('token'))
+    usePageTitle(t('home.pageTitle', 'Home'))
+
 
     if (!isLoggedIn) {
         return (
@@ -76,5 +80,7 @@ function Home() {
         </div>
     )
 }
+
+
 
 export default Home

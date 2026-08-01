@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
 import DailyProgress from '../components/DailyProgress'
+import { usePageTitle } from '../hooks/usePageTitle.js'
+
 
 type DiaryEntry = {
     id: string
@@ -85,6 +87,7 @@ function MyDiary() {
     const isUkrainian = i18n.language?.startsWith('uk') ?? false
     const unitG = isUkrainian ? 'г' : 'g'
     const unitKcal = isUkrainian ? 'ккал' : 'kcal'
+    usePageTitle(t('myDiary.pageTitle', 'Diary'))
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -237,6 +240,7 @@ function MyDiary() {
             setError(t('myDiary.errorUpdateEntry'))
         }
     }
+
 
 
     return (

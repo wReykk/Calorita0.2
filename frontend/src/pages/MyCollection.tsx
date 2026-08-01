@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
+import { usePageTitle } from '../hooks/usePageTitle.js'
 
 type Product = {
     id: number
@@ -40,6 +41,7 @@ function Products() {
     const [form, setForm] = useState<ProductFormState>(emptyForm)
     const [editState, setEditState] = useState<EditState>({ productId: null, values: emptyForm })
     const { t } = useTranslation()
+    usePageTitle(t('home.pageTitle', 'My Collection'))
 
     useEffect(() => {
         const fetchProducts = async () => {

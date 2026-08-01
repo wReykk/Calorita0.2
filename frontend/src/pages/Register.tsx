@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
+import { usePageTitle } from '../hooks/usePageTitle.js'
 
 function Register() {
     const [name, setName] = useState('')
@@ -11,6 +12,7 @@ function Register() {
     const [successMessage, setSuccessMessage] = useState('')
     const navigate = useNavigate()
     const { t } = useTranslation()
+    usePageTitle(t('home.pageTitle', 'Register'))
 
     const persistAuthState = (token: string, user: Record<string, unknown>) => {
         localStorage.setItem('token', token)

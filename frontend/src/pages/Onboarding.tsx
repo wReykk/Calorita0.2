@@ -1,8 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 import UserSettingsForm from '../components/UserSettingsForm'
+import { usePageTitle } from '../hooks/usePageTitle.js'
+import { useTranslation } from 'react-i18next'
 
 function Onboarding() {
     const navigate = useNavigate()
+    const { t } = useTranslation()
+    usePageTitle(t('home.pageTitle', 'On Boarding'))
 
     return (
         <div className="mx-auto flex max-w-5xl flex-col gap-6">
@@ -40,5 +44,7 @@ function Onboarding() {
         </div>
     )
 }
+
+
 
 export default Onboarding
