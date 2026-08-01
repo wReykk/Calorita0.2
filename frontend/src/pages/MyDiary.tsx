@@ -101,7 +101,7 @@ function MyDiary() {
         }
 
         fetchProducts()
-    }, [])
+    }, [t])
 
     useEffect(() => {
         const fetchEntries = async () => {
@@ -126,7 +126,7 @@ function MyDiary() {
         }
 
         fetchEntries()
-    }, [selectedDate])
+    }, [selectedDate, t])
 
     const summary = entries.reduce<Summary>(
         (acc, entry) => {
@@ -161,6 +161,21 @@ function MyDiary() {
         const nextDate = parseDateInput(selectedDate)
         nextDate.setDate(nextDate.getDate() + delta)
         setSelectedDate(formatDateInput(nextDate))
+    }
+
+    const isSelectedDateToday = () => {
+        const today = new Date()
+        const selected = parseDateInput(selectedDate)
+
+        return (
+            selected.getFullYear() === today.getFullYear() &&
+            selected.getMonth() === today.getMonth() &&
+            selected.getDate() === today.getDate()
+        )
+    }
+
+    const handleBackToToday = () => {
+        setSelectedDate(formatDateInput(new Date()))
     }
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -223,6 +238,7 @@ function MyDiary() {
         }
     }
 
+
     return (
         <div className="space-y-6">
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -232,7 +248,7 @@ function MyDiary() {
                         <p className="text-sm text-gray-600">{t('myDiary.subtitle')}</p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         <button
                             type="button"
                             onClick={() => changeDay(-1)}
@@ -253,6 +269,15 @@ function MyDiary() {
                         >
                             {t('myDiary.nextDay')}
                         </button>
+                        {!isSelectedDateToday() ? (
+                            <button
+                                type="button"
+                                onClick={handleBackToToday}
+                                className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
+                            >
+                                Back to Today
+                            </button>
+                        ) : null}
                     </div>
                 </div>
             </div>
@@ -334,7 +359,7 @@ function MyDiary() {
                                             <div className="flex flex-col gap-3">
                                                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                                     <div className="min-w-0 flex-1">
-                                                        <p className="break-words font-medium text-gray-900">{entry.product?.name || t('myDiary.unnamedProduct')}</p>
+                                                        <p className="wrap-break-word font-medium text-gray-900">{entry.product?.name || t('myDiary.unnamedProduct')}</p>
                                                         <p className="mt-1 text-sm text-gray-600">{t('myDiary.consumedLabel', { amount: entry.amount })}</p>
                                                     </div>
 
@@ -376,19 +401,19 @@ function MyDiary() {
                                                 </div>
 
                                                 <div className="flex flex-wrap gap-2 text-sm text-gray-600">
-                                                    <div className="min-w-[110px] flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                                                    <div className="min-w-27.5 flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
                                                         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">{t('myDiary.calories')}</p>
                                                         <p className="mt-1 font-semibold text-slate-900">{nutrition.calories} {unitKcal}</p>
                                                     </div>
-                                                    <div className="min-w-[110px] flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                                                    <div className="min-w-27.5 flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
                                                         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">{t('myDiary.protein')}</p>
                                                         <p className="mt-1 font-semibold text-slate-900">{nutrition.protein} {unitG}</p>
                                                     </div>
-                                                    <div className="min-w-[110px] flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                                                    <div className="min-w-27.5 flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
                                                         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">{t('myDiary.fat')}</p>
                                                         <p className="mt-1 font-semibold text-slate-900">{nutrition.fat} {unitG}</p>
                                                     </div>
-                                                    <div className="min-w-[110px] flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                                                    <div className="min-w-27.5 flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
                                                         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">{t('myDiary.carbs')}</p>
                                                         <p className="mt-1 font-semibold text-slate-900">{nutrition.carbs} {unitG}</p>
                                                     </div>

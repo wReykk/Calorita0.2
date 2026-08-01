@@ -2,7 +2,7 @@
     "navbar": {
         "home": "Home",
         "myDiary": "My Diary",
-        "products": "Products",
+        "products": "My Collection",
         "login": "Login",
         "register": "Register",
         "logout": "Logout",
@@ -80,8 +80,8 @@
         "unnamedProduct": "Unnamed product"
     },
     "products": {
-        "title": "Your Products",
-        "subtitle": "Add a product and manage your nutrition list.",
+        "title": "Your Collection",
+        "subtitle": "Add products or recipies and manage your nutrition list.",
         "tipValue": "TIP",
         "tip": "Always enter nutritional values calculated per 100g (or 100ml) of the product. When logging items to your diary, you can specify your exact portion size in grams. For individual items (like eggs or a piece of fruit), you can create them as '1 piece' and set the weight of that single item in grams (e.g., 1 egg = 50g).",
         "name": "Name",
