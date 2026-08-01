@@ -9,6 +9,40 @@ const calculateAge = (dob: string | Date) => {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
 };
 
+export const getUserById = async (id: string) => {
+    const user = await prisma.user.findUnique({
+        where: { id },
+        select: {
+            id: true,
+            email: true,
+            name: true,
+            dateOfBirth: true,
+            sex: true,
+            height: true,
+            weight: true,
+            activityLevel: true,
+            goal: true,
+            targetWeigth: true,
+            pace: true,
+            dailyCalories: true,
+            dailyProtein: true,
+            dailyFat: true,
+            dailyCarbs: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+
+    if (!user) {
+        throw new Error('USER_NOT_FOUND');
+    }
+
+    return {
+        ...user,
+        targetWeight: user.targetWeigth ?? null,
+    };
+};
+
 export const updateUserParameters = async (id: string, data: any) => {
     const { weight, height, dateOfBirth, sex, activityLevel, goal, pace, targetWeight } = data;
 
@@ -49,6 +83,7 @@ export const updateUserParameters = async (id: string, data: any) => {
 
     return {
         ...updatedUser,
+        targetWeight: updatedUser.targetWeigth ?? null,
         estimatedWeeksToGoal: macros.estimatedWeeksToGoal
     };
 };
