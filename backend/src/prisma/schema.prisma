@@ -12,7 +12,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 enum Sex {
   MALE
   FEMALE
@@ -38,37 +37,42 @@ enum Pace {
   HARD
 }
 
-
 model Product {
   id          String   @id @default(uuid())
   name        String
-  calories    Int     
-  protein     Float?  
-  fat         Float? 
-  carbs       Float? 
+  calories    Int
+  protein     Float?
+  fat         Float?
+  carbs       Float?
   description String?
   createdAt   DateTime @default(now())
 
-  userId      String   
-  user        User     @relation(fields: [userId], references: [id])
+  pieceWeight Float?
+  pieceName   String?
+
+  isCustom  Boolean @default(false)
+  creatorId String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
   diaryEntry DiaryEntry[]
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String     
-  name      String?  
+  id       String  @id @default(uuid())
+  email    String  @unique
+  password String
+  name     String?
 
-  dateOfBirth DateTime?
-  sex Sex?
-  height Float?
-  weight Float?
+  dateOfBirth   DateTime?
+  sex           Sex?
+  height        Float?
+  weight        Float?
   activityLevel ActivityLevel?
-  goal Goal?
-  targetWeigth Float?
-  pace Pace? @default(MEDIUM)
+  goal          Goal?
+  targetWeight  Float?
+  pace          Pace?          @default(MEDIUM)
 
   dailyCalories Int?
   dailyProtein  Float?
@@ -78,21 +82,21 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  products  Product[]
+  products Product[]
 
   diaryEntry DiaryEntry[]
 }
 
 model DiaryEntry {
-  id String @id @default(uuid())
-  date      DateTime @default(now())
-  amount    Float
+  id     String   @id @default(uuid())
+  date   DateTime @default(now())
+  amount Float
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

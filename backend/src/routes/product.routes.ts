@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ProductController } from '../controllers/product.controller.js';
+import { searchProducts } from '../controllers/fatsecret.controller.js'; // <-- Импортируем наш поиск
 import { validate } from '../middlewares/validate.middleware.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import { createProductSchema, updateProductSchema } from '../schemas/product.schema.js';
@@ -8,6 +9,8 @@ const router = Router();
 const controller = new ProductController();
 
 router.use(authenticate);
+
+router.get('/search', searchProducts);
 
 router.get('/', controller.getProducts);
 router.get('/:id', controller.getProductById);

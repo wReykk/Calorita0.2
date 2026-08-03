@@ -22,7 +22,7 @@ export const getUserById = async (id: string) => {
             weight: true,
             activityLevel: true,
             goal: true,
-            targetWeigth: true,
+            targetWeight: true,
             pace: true,
             dailyCalories: true,
             dailyProtein: true,
@@ -39,7 +39,7 @@ export const getUserById = async (id: string) => {
 
     return {
         ...user,
-        targetWeight: user.targetWeigth ?? null,
+        targetWeight: user.targetWeight ?? null,
     };
 };
 
@@ -67,7 +67,7 @@ export const updateUserParameters = async (id: string, data: any) => {
         where: { id },
         data: {
             weight: Number(weight),
-            targetWeigth: targetWeight ? Number(targetWeight) : null,
+            targetWeight: targetWeight ? Number(targetWeight) : null,
             height: Number(height),
             dateOfBirth: new Date(dateOfBirth),
             sex,
@@ -83,7 +83,7 @@ export const updateUserParameters = async (id: string, data: any) => {
 
     return {
         ...updatedUser,
-        targetWeight: updatedUser.targetWeigth ?? null,
+        targetWeight: updatedUser.targetWeight ?? null,
         estimatedWeeksToGoal: macros.estimatedWeeksToGoal
     };
 };
