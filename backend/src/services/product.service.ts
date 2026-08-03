@@ -35,4 +35,28 @@ export class ProductService {
             where: { id, userId }
         });
     }
+
+    public async searchLocalProducts(userId: string, query: string) {
+        const localProducts = await prisma.product.findMany({
+            where: {
+                userId: userId,
+                name: {
+                    contains: query,
+                    mode: 'insensitive'
+                }
+            },
+            take: 10
+        });
+
+        return localProducts.map(p => ({
+            id: p.id,
+            name: p.name,
+            calories: p.calories,
+            protein: p.protein,
+            fat: p.fat,
+            carbs: p.carbs,
+            description: p.pieceName ? `Per ${p.pieceName}` : 'Per 100g',
+            isGlobal: false
+        }));
+    }
 }

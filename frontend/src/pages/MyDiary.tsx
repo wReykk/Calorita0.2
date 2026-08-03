@@ -29,6 +29,7 @@ type ProductOption = {
     externalId?: string
     servingDescription?: string | null
     description?: string
+    isGlobal?: boolean
 }
 
 type Summary = {
@@ -382,31 +383,56 @@ function MyDiary() {
 
                                 {isDropdownOpen && searchResults.length > 0 ? (
                                     <ul className="absolute z-10 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
-                                        {searchResults.map((product) => (
-                                            <li key={product.id}>
-                                                <button
-                                                    type="button"
-                                                    onMouseDown={(event) => {
-                                                        event.preventDefault()
-                                                        handleSelectProduct(product)
-                                                    }}
-                                                    className="flex w-full flex-col items-start px-3 py-2 text-left transition hover:bg-slate-50"
-                                                >
-                                                    <span className="text-sm font-medium text-slate-900">{product.name}</span>
+                                        {(() => {
+                                            const myProducts = searchResults.filter((product) => product.isGlobal === false)
+                                            const globalProducts = searchResults.filter((product) => product.isGlobal === true)
+                                            const sections = [
+                                                { title: 'My Products', items: myProducts },
+                                                { title: 'Global Database', items: globalProducts },
+                                            ]
 
-                                                    {product.description ? (
-                                                        <span className="mt-1 text-xs font-medium text-emerald-600">
-                                                            {product.description.includes('Per 100g')
-                                                                ? 'Per 100g'
-                                                                : product.description.split(' - ')[0]?.trim()}
+                                            return sections.flatMap((section, sectionIndex) => {
+                                                if (section.items.length === 0) {
+                                                    return []
+                                                }
+
+                                                return [
+                                                    <li key={`${section.title}-header`} className="border-b border-slate-100 bg-slate-50 px-3 py-2">
+                                                        <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                                                            {section.title}
                                                         </span>
-                                                    ) : null}
-                                                    <span className="mt-1 text-xs text-slate-500">
-                                                        {Math.round(product.calories ?? 0)} kcal • {product.protein ?? 0}g P • {product.fat ?? 0}g F • {product.carbs ?? 0}g C
-                                                    </span>
-                                                </button>
-                                            </li>
-                                        ))}
+                                                    </li>,
+                                                    ...section.items.map((product) => (
+                                                        <li key={product.id}>
+                                                            <button
+                                                                type="button"
+                                                                onMouseDown={(event) => {
+                                                                    event.preventDefault()
+                                                                    handleSelectProduct(product)
+                                                                }}
+                                                                className="flex w-full flex-col items-start px-3 py-2 text-left transition hover:bg-slate-50"
+                                                            >
+                                                                <span className="text-sm font-medium text-slate-900">{product.name}</span>
+
+                                                                {product.description ? (
+                                                                    <span className="mt-1 text-xs font-medium text-emerald-600">
+                                                                        {product.description.includes('Per 100g')
+                                                                            ? 'Per 100g'
+                                                                            : product.description.split(' - ')[0]?.trim()}
+                                                                    </span>
+                                                                ) : null}
+                                                                <span className="mt-1 text-xs text-slate-500">
+                                                                    {Math.round(product.calories ?? 0)} kcal • {product.protein ?? 0}g P • {product.fat ?? 0}g F • {product.carbs ?? 0}g C
+                                                                </span>
+                                                            </button>
+                                                        </li>
+                                                    )),
+                                                    sectionIndex < sections.length - 1 && section.items.length > 0 ? (
+                                                        <li key={`${section.title}-divider`} className="border-t border-slate-100" />
+                                                    ) : null,
+                                                ]
+                                            })
+                                        })()}
                                     </ul>
                                 ) : null}
                             </div>

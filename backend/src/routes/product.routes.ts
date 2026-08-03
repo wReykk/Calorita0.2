@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ProductController } from '../controllers/product.controller.js';
-import { searchProducts } from '../controllers/fatsecret.controller.js'; // <-- Импортируем наш поиск
+import { searchProducts } from '../controllers/searchProducts.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import { createProductSchema, updateProductSchema } from '../schemas/product.schema.js';
