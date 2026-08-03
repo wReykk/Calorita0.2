@@ -53,8 +53,11 @@ model Product {
   isCustom  Boolean @default(false)
   creatorId String?
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  externalId  String?  @unique
+  isGlobal    Boolean  @default(false)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
   diaryEntry DiaryEntry[]
 }

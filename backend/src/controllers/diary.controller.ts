@@ -1,6 +1,7 @@
 import { type NextFunction, type Response } from 'express';
 import { DiaryService } from '../services/diary.service.js';
 import { type AuthRequest } from '../middlewares/auth.middleware.js';
+import { prisma } from '../prisma/prisma.config.js';
 
 const diaryService = new DiaryService();
 
@@ -9,7 +10,32 @@ export class DiaryController {
     public addEntry = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
             const userId = req.userId as string;
-            const entry = await diaryService.addEntry(userId, req.body);
+            const { productId, amount, productData, date } = req.body;
+
+            let finalProductId = productId;
+
+            if (productData) {
+                const savedProduct = await prisma.product.upsert({
+                    where: { externalId: productData.externalId },
+                    update: {},
+                    create: {
+                        name: productData.name,
+                        calories: productData.calories,
+                        protein: productData.protein,
+                        fat: productData.fat,
+                        carbs: productData.carbs,
+                        externalId: productData.externalId,
+                        isGlobal: true
+                    }
+                });
+
+                finalProductId = savedProduct.id;
+            }
+
+            const entry = await diaryService.addEntry(userId, {
+                ...req.body,
+                productId: finalProductId
+            });
 
             res.status(201).json(entry);
         } catch (error) {

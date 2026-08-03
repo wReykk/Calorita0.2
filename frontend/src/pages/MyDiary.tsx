@@ -21,6 +21,12 @@ type DiaryEntry = {
 type ProductOption = {
     id: string
     name: string
+    calories?: number | null
+    protein?: number | null
+    fat?: number | null
+    carbs?: number | null
+    externalId?: string
+    servingDescription?: string | null
 }
 
 type Summary = {
@@ -57,7 +63,9 @@ function getConsumedNutrition(entry: DiaryEntry) {
 function MyDiary() {
     const [selectedDate, setSelectedDate] = useState(() => formatDateInput(new Date()))
     const [entries, setEntries] = useState<DiaryEntry[]>([])
-    const [products, setProducts] = useState<ProductOption[]>([])
+    const [searchQuery, setSearchQuery] = useState('')
+    const [searchResults, setSearchResults] = useState<ProductOption[]>([])
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const [targetMacros] = useState(() => {
         try {
             const storedUser = localStorage.getItem('user')
@@ -80,6 +88,7 @@ function MyDiary() {
     const [error, setError] = useState('')
     const [productId, setProductId] = useState('')
     const [weight, setWeight] = useState('')
+    const [selectedServingDescription, setSelectedServingDescription] = useState('')
     const [submitting, setSubmitting] = useState(false)
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
     const [editingWeight, setEditingWeight] = useState('')
@@ -90,21 +99,36 @@ function MyDiary() {
     usePageTitle(t('myDiary.pageTitle', 'Diary'))
 
     useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const response = await apiClient.get('/products')
-                const productList = Array.isArray(response.data) ? response.data : []
-                setProducts(productList)
-                if (productList[0]) {
-                    setProductId(productList[0].id)
-                }
-            } catch {
-                setError(t('myDiary.errorLoadProducts'))
-            }
+        if (searchQuery.trim().length < 2) {
+            setTimeout(() => {
+                setSearchResults([])
+                setIsDropdownOpen(false)
+            }, 0)
+            return
         }
 
-        fetchProducts()
-    }, [t])
+        const timeoutId = window.setTimeout(async () => {
+            try {
+                const token = localStorage.getItem('token')
+                const response = await apiClient.get('/products/search', {
+                    params: { q: searchQuery.trim() },
+                    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                })
+
+                const results = Array.isArray(response.data) ? response.data : []
+                setSearchResults(results.map((product: ProductOption) => ({
+                    ...product,
+                    id: product.id || product.externalId || '',
+                })))
+                setIsDropdownOpen(results.length > 0)
+            } catch {
+                setSearchResults([])
+                setIsDropdownOpen(false)
+            }
+        }, 500)
+
+        return () => window.clearTimeout(timeoutId)
+    }, [searchQuery])
 
     useEffect(() => {
         const fetchEntries = async () => {
@@ -180,6 +204,17 @@ function MyDiary() {
     const handleBackToToday = () => {
         setSelectedDate(formatDateInput(new Date()))
     }
+
+    const handleSelectProduct = (product: ProductOption) => {
+        setProductId(product.id)
+        setSearchQuery(product.name)
+        setSelectedServingDescription(product.servingDescription ?? '')
+        setWeight(product.servingDescription === 'Per 100g' ? '' : '1')
+        setSearchResults([])
+        setIsDropdownOpen(false)
+    }
+
+    const portionInputLabel = selectedServingDescription === 'Per 100g' ? 'Weight (g)' : 'Quantity'
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -297,24 +332,55 @@ function MyDiary() {
                         <p className="mt-1 text-sm text-gray-600">{t('myDiary.logEntrySubtitle')}</p>
 
                         <form onSubmit={handleSubmit} className="mt-4 grid gap-4 md:grid-cols-[1.4fr_0.8fr_auto] md:items-end">
-                            <div>
+                            <div className="relative">
                                 <label className="mb-1 block text-sm font-medium text-gray-700">{t('myDiary.product')}</label>
-                                <select
-                                    value={productId}
-                                    onChange={(event) => setProductId(event.target.value)}
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(event) => {
+                                        setSearchQuery(event.target.value)
+                                        setProductId('')
+                                        setSearchResults([])
+                                        setIsDropdownOpen(event.target.value.trim().length >= 2)
+                                    }}
+                                    onFocus={() => {
+                                        if (searchQuery.trim().length >= 2) {
+                                            setIsDropdownOpen(true)
+                                        }
+                                    }}
+                                    placeholder={t('myDiary.productSearchPlaceholder', 'Search products')}
                                     className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
                                     required
-                                >
-                                    {products.map((product) => (
-                                        <option key={product.id} value={product.id}>
-                                            {product.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                />
+
+                                {isDropdownOpen && searchResults.length > 0 ? (
+                                    <ul className="absolute z-10 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                                        {searchResults.map((product) => (
+                                            <li key={product.id}>
+                                                <button
+                                                    type="button"
+                                                    onMouseDown={(event) => {
+                                                        event.preventDefault()
+                                                        handleSelectProduct(product)
+                                                    }}
+                                                    className="flex w-full flex-col items-start px-3 py-2 text-left transition hover:bg-slate-50"
+                                                >
+                                                    <span className="text-sm font-medium text-slate-900">{product.name}</span>
+                                                    {product.servingDescription ? (
+                                                        <span className="mt-1 text-xs font-medium text-emerald-600">{product.servingDescription}</span>
+                                                    ) : null}
+                                                    <span className="mt-1 text-xs text-slate-500">
+                                                        {Math.round(product.calories ?? 0)} kcal • {product.protein ?? 0}g P • {product.fat ?? 0}g F • {product.carbs ?? 0}g C
+                                                    </span>
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : null}
                             </div>
 
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">{t('myDiary.weight')}</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700">{portionInputLabel}</label>
                                 <input
                                     type="number"
                                     min="1"
