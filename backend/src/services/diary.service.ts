@@ -44,7 +44,8 @@ export class DiaryService {
             return null;
         }
 
-        const multiplier = weight / 100;
+        const isPiece = !!existingEntry.product.pieceName;
+        const multiplier = isPiece ? weight : weight / 100;
         const calories = (existingEntry.product.calories ?? 0) * multiplier;
         const protein = (existingEntry.product.protein ?? 0) * multiplier;
         const fat = (existingEntry.product.fat ?? 0) * multiplier;
@@ -93,7 +94,8 @@ export class DiaryService {
         });
 
         const summary = entries.reduce((acc, entry) => {
-            const multiplier = entry.amount / 100;
+            const isPiece = !!entry.product.pieceName;
+            const multiplier = isPiece ? entry.amount : entry.amount / 100;
 
             acc.totalCalories += entry.product.calories * multiplier;
             acc.totalProtein += (entry.product.protein || 0) * multiplier;

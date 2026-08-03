@@ -12,7 +12,8 @@ export const addDiaryEntrySchema = z.object({
             fat: z.number(),
             carbs: z.number(),
             externalId: z.string(),
-            isGlobal: z.boolean()
+            isGlobal: z.boolean(),
+            pieceName: z.string().optional()
         }).optional(),
 
         date: z.string().datetime({ message: 'Wrong date format.' }).optional()

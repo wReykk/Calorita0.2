@@ -15,6 +15,7 @@ type DiaryEntry = {
         protein?: number | null
         fat?: number | null
         carbs?: number | null
+        pieceName?: string | null
     }
 }
 
@@ -27,6 +28,7 @@ type ProductOption = {
     carbs?: number | null
     externalId?: string
     servingDescription?: string | null
+    description?: string
 }
 
 type Summary = {
@@ -49,7 +51,7 @@ function parseDateInput(value: string) {
 }
 
 function getConsumedNutrition(entry: DiaryEntry) {
-    const multiplier = (entry.amount || 0) / 100
+    const multiplier = entry.product?.pieceName ? (entry.amount || 0) : (entry.amount || 0) / 100
     const product = entry.product
 
     return {
@@ -92,6 +94,7 @@ function MyDiary() {
     const [submitting, setSubmitting] = useState(false)
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
     const [editingWeight, setEditingWeight] = useState('')
+    const [selectedProduct, setSelectedProduct] = useState<ProductOption | null>(null)
     const { t, i18n } = useTranslation()
     const isUkrainian = i18n.language?.startsWith('uk') ?? false
     const unitG = isUkrainian ? 'г' : 'g'
@@ -157,7 +160,7 @@ function MyDiary() {
 
     const summary = entries.reduce<Summary>(
         (acc, entry) => {
-            const multiplier = (entry.amount || 0) / 100
+            const multiplier = entry.product?.pieceName ? (entry.amount || 0) : (entry.amount || 0) / 100
             const product = entry.product
 
             acc.totalCalories += (product?.calories || 0) * multiplier
@@ -207,9 +210,15 @@ function MyDiary() {
 
     const handleSelectProduct = (product: ProductOption) => {
         setProductId(product.id)
+        setSelectedProduct(product)
         setSearchQuery(product.name)
-        setSelectedServingDescription(product.servingDescription ?? '')
-        setWeight(product.servingDescription === 'Per 100g' ? '' : '1')
+
+        const is100g = product.description?.includes('Per 100g') ?? false
+        const servingText = is100g ? 'Per 100g' : (product.description?.split(' - ')[0]?.trim() || '')
+
+        setSelectedServingDescription(servingText)
+        setWeight(is100g ? '' : '1')
+
         setSearchResults([])
         setIsDropdownOpen(false)
     }
@@ -232,11 +241,28 @@ function MyDiary() {
                 productId,
                 amount: Number(weight),
                 date: new Date(`${selectedDate}T12:00:00`).toISOString(),
+                productData: selectedProduct?.externalId ? {
+                    name: selectedProduct.name,
+                    calories: selectedProduct.calories ?? 0,
+                    protein: selectedProduct.protein ?? 0,
+                    fat: selectedProduct.fat ?? 0,
+                    carbs: selectedProduct.carbs ?? 0,
+                    externalId: selectedProduct.externalId,
+                    isGlobal: true,
+                    pieceName: selectedProduct.description?.includes('Per 100g')
+                        ? undefined
+                        : selectedProduct.description?.split(' - ')[0]?.trim()
+                } : undefined
             })
 
             const newEntry = response.data
             setEntries((prev) => [newEntry, ...prev])
+
             setWeight('')
+            setSearchQuery('')
+            setProductId('')
+            setSelectedProduct(null)
+
         } catch {
             setError(t('myDiary.errorAddEntry'))
         } finally {
@@ -340,6 +366,7 @@ function MyDiary() {
                                     onChange={(event) => {
                                         setSearchQuery(event.target.value)
                                         setProductId('')
+                                        setSelectedProduct(null)
                                         setSearchResults([])
                                         setIsDropdownOpen(event.target.value.trim().length >= 2)
                                     }}
@@ -366,8 +393,13 @@ function MyDiary() {
                                                     className="flex w-full flex-col items-start px-3 py-2 text-left transition hover:bg-slate-50"
                                                 >
                                                     <span className="text-sm font-medium text-slate-900">{product.name}</span>
-                                                    {product.servingDescription ? (
-                                                        <span className="mt-1 text-xs font-medium text-emerald-600">{product.servingDescription}</span>
+
+                                                    {product.description ? (
+                                                        <span className="mt-1 text-xs font-medium text-emerald-600">
+                                                            {product.description.includes('Per 100g')
+                                                                ? 'Per 100g'
+                                                                : product.description.split(' - ')[0]?.trim()}
+                                                        </span>
                                                     ) : null}
                                                     <span className="mt-1 text-xs text-slate-500">
                                                         {Math.round(product.calories ?? 0)} kcal • {product.protein ?? 0}g P • {product.fat ?? 0}g F • {product.carbs ?? 0}g C
@@ -430,7 +462,11 @@ function MyDiary() {
                                                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                                     <div className="min-w-0 flex-1">
                                                         <p className="wrap-break-word font-medium text-gray-900">{entry.product?.name || t('myDiary.unnamedProduct')}</p>
-                                                        <p className="mt-1 text-sm text-gray-600">{t('myDiary.consumedLabel', { amount: entry.amount })}</p>
+                                                        <p className="mt-1 text-sm text-gray-600">
+                                                            {entry.product?.pieceName
+                                                                ? `${entry.amount} x ${entry.product.pieceName.replace('Per ', '')}`
+                                                                : t('myDiary.consumedLabel', { amount: entry.amount })}
+                                                        </p>
                                                     </div>
 
                                                     {editingEntryId === entry.id ? (
