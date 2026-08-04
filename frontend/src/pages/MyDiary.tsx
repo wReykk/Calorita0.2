@@ -29,7 +29,8 @@ type ProductOption = {
     externalId?: string
     servingDescription?: string | null
     description?: string
-    isGlobal?: boolean
+    isGlobal?: boolean,
+    pieceName?: string | null
 }
 
 type Summary = {
@@ -214,8 +215,8 @@ function MyDiary() {
         setSelectedProduct(product)
         setSearchQuery(product.name)
 
-        const is100g = product.description?.includes('Per 100g') ?? false
-        const servingText = is100g ? 'Per 100g' : (product.description?.split(' - ')[0]?.trim() || '')
+        const is100g = !product.pieceName && (product.description?.includes('Per 100g') ?? true)
+        const servingText = is100g ? 'Per 100g' : (product.pieceName || product.description?.split(' - ')[0]?.trim() || '')
 
         setSelectedServingDescription(servingText)
         setWeight(is100g ? '' : '1')
@@ -250,9 +251,7 @@ function MyDiary() {
                     carbs: selectedProduct.carbs ?? 0,
                     externalId: selectedProduct.externalId,
                     isGlobal: true,
-                    pieceName: selectedProduct.description?.includes('Per 100g')
-                        ? undefined
-                        : selectedProduct.description?.split(' - ')[0]?.trim()
+                    pieceName: selectedProduct.pieceName || undefined
                 } : undefined
             })
 

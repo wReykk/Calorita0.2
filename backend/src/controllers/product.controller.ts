@@ -36,7 +36,7 @@ export class ProductController {
     public createProduct = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
             const userId = req.userId as string;
-            const { name, calories, protein, fat, carbs, description } = req.body;
+            const { name, calories, protein, fat, carbs, description, pieceName } = req.body;
 
             const newProduct = await productService.createProduct(userId, {
                 name,
@@ -44,7 +44,8 @@ export class ProductController {
                 protein,
                 fat,
                 carbs,
-                description
+                description,
+                pieceName
             });
 
             res.status(201).json(newProduct);

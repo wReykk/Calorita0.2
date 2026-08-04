@@ -14,7 +14,7 @@ export class ProductService {
         });
     }
 
-    public async createProduct(userId: string, data: { name: string; calories: number; protein?: number; fat?: number; carbs?: number; description?: string }) {
+    public async createProduct(userId: string, data: { name: string; calories: number; protein?: number; fat?: number; carbs?: number; description?: string; pieceName?: string }) {
         return await prisma.product.create({
             data: {
                 ...data,
@@ -23,7 +23,7 @@ export class ProductService {
         });
     }
 
-    public async updateProduct(id: string, userId: string, data: { name?: string; calories?: number; protein?: number; fat?: number; carbs?: number; description?: string }) {
+    public async updateProduct(id: string, userId: string, data: { name?: string; calories?: number; protein?: number; fat?: number; carbs?: number; description?: string; pieceName?: string }) {
         return await prisma.product.update({
             where: { id, userId },
             data: data
@@ -55,7 +55,9 @@ export class ProductService {
             protein: p.protein,
             fat: p.fat,
             carbs: p.carbs,
-            description: p.pieceName ? `Per ${p.pieceName}` : 'Per 100g',
+            externalId: p.id,
+            description: p.pieceName ? `${p.pieceName} - Calories: ${p.calories}kcal` : `Per 100g - Calories: ${p.calories}kcal`,
+            pieceName: p.pieceName,
             isGlobal: false
         }));
     }

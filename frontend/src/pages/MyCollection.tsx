@@ -39,6 +39,7 @@ function Products() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [form, setForm] = useState<ProductFormState>(emptyForm)
+    const [pieceName, setPieceName] = useState('')
     const [editState, setEditState] = useState<EditState>({ productId: null, values: emptyForm })
     const { t } = useTranslation()
     usePageTitle(t('home.pageTitle', 'My Collection'))
@@ -63,17 +64,20 @@ function Products() {
         setError('')
 
         try {
+            const normalizedPieceName = pieceName.trim() || undefined
             const payload = {
                 name: form.name,
                 calories: Number(form.calories),
                 protein: Number(form.protein),
                 fat: Number(form.fat),
                 carbs: Number(form.carbs),
+                pieceName: normalizedPieceName,
             }
 
             const response = await apiClient.post('/products', payload)
             setProducts((prev) => [response.data, ...prev])
             setForm(emptyForm)
+            setPieceName('')
         } catch {
             setError(t('products.errorCreate'))
         }
@@ -202,9 +206,24 @@ function Products() {
                     </div>
                 </div>
 
+                <div className="mt-4 max-w-xl">
+                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                        {t('products.portionTypeLabel', 'Portion type (optional)')}
+                    </label>
+                    <input
+                        value={pieceName}
+                        onChange={(event) => setPieceName(event.target.value)}
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-slate-500"
+                        placeholder={t('products.portionTypePlaceholder', 'e.g. 1 bar, 1 serving')}
+                    />
+                    <p className="mt-1 text-xs text-slate-500">
+                        {t('products.portionTypeHelp', 'Leave blank if macros are per 100g.')}
+                    </p>
+                </div>
+
                 <button
                     type="submit"
-                    className="rounded-lg bg-slate-900 px-4 py-2 font-medium text-white transition hover:bg-slate-700"
+                    className="mt-4 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white transition hover:bg-slate-700"
                 >
                     {t('products.addProduct')}
                 </button>

@@ -17,6 +17,7 @@ export const createProductSchema = z.object({
         protein: z.number().min(0, 'Protein cannot be negative'),
         fat: z.number().min(0, 'Fat cannot be negative'),
         carbs: z.number().min(0, 'Carbs cannot be negative'),
+        pieceName: z.string().optional()
     }),
 });
 
