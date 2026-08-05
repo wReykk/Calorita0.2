@@ -59,7 +59,24 @@ model Product {
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
 
+  isRecipe    Boolean  @default(false)
+
+  recipeIngredients RecipeIngredient[] @relation("RecipeToIngredient")
+  usedInRecipes     RecipeIngredient[] @relation("IngredientToRecipe")
+
   diaryEntry DiaryEntry[]
+}
+
+model RecipeIngredient {
+  id           String   @id @default(uuid())
+  
+  recipeId     String
+  recipe       Product  @relation("RecipeToIngredient", fields: [recipeId], references: [id], onDelete: Cascade)
+
+  ingredientId String
+  ingredient   Product  @relation("IngredientToRecipe", fields: [ingredientId], references: [id], onDelete: Restrict)
+  
+  amount       Float
 }
 
 model User {
