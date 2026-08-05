@@ -84,4 +84,26 @@ export class ProductController {
             next(error);
         }
     };
+
+    public searchProducts = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const userId = req.userId as string;
+            const query = req.query.q as string;
+
+            if (!query) {
+                res.status(400).json({ message: 'Search query is required' });
+                return;
+            }
+
+            const localProducts = await productService.searchLocalProducts(userId, query);
+
+            const externalProducts = await productService.searchExternalProducts(query);
+
+            const combinedProducts = [...localProducts, ...externalProducts];
+
+            res.status(200).json(combinedProducts);
+        } catch (error) {
+            next(error);
+        }
+    };
 }

@@ -103,4 +103,11 @@ model DiaryEntry {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  name      String
+  calories  Float
+  protein   Float
+  fat       Float
+  carbs     Float
+  pieceName String?
 }

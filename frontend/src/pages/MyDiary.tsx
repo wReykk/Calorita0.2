@@ -9,14 +9,12 @@ type DiaryEntry = {
     id: string
     amount: number
     date?: string
-    product?: {
-        name: string
-        calories?: number | null
-        protein?: number | null
-        fat?: number | null
-        carbs?: number | null
-        pieceName?: string | null
-    }
+    name?: string
+    calories?: number | null
+    protein?: number | null
+    fat?: number | null
+    carbs?: number | null
+    pieceName?: string | null
 }
 
 type ProductOption = {
@@ -53,14 +51,13 @@ function parseDateInput(value: string) {
 }
 
 function getConsumedNutrition(entry: DiaryEntry) {
-    const multiplier = entry.product?.pieceName ? (entry.amount || 0) : (entry.amount || 0) / 100
-    const product = entry.product
+    const multiplier = entry.pieceName ? (entry.amount || 0) : (entry.amount || 0) / 100
 
     return {
-        calories: Math.round((product?.calories || 0) * multiplier),
-        protein: Number((product?.protein || 0) * multiplier).toFixed(1),
-        fat: Number((product?.fat || 0) * multiplier).toFixed(1),
-        carbs: Number((product?.carbs || 0) * multiplier).toFixed(1),
+        calories: Math.round((entry.calories || 0) * multiplier),
+        protein: Number((entry.protein || 0) * multiplier).toFixed(1),
+        fat: Number((entry.fat || 0) * multiplier).toFixed(1),
+        carbs: Number((entry.carbs || 0) * multiplier).toFixed(1),
     }
 }
 
@@ -162,13 +159,12 @@ function MyDiary() {
 
     const summary = entries.reduce<Summary>(
         (acc, entry) => {
-            const multiplier = entry.product?.pieceName ? (entry.amount || 0) : (entry.amount || 0) / 100
-            const product = entry.product
+            const multiplier = entry.pieceName ? (entry.amount || 0) : (entry.amount || 0) / 100
 
-            acc.totalCalories += (product?.calories || 0) * multiplier
-            acc.totalProtein += (product?.protein || 0) * multiplier
-            acc.totalFat += (product?.fat || 0) * multiplier
-            acc.totalCarbs += (product?.carbs || 0) * multiplier
+            acc.totalCalories += (entry.calories || 0) * multiplier
+            acc.totalProtein += (entry.protein || 0) * multiplier
+            acc.totalFat += (entry.fat || 0) * multiplier
+            acc.totalCarbs += (entry.carbs || 0) * multiplier
 
             return acc
         },
@@ -486,10 +482,10 @@ function MyDiary() {
                                             <div className="flex flex-col gap-3">
                                                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                                     <div className="min-w-0 flex-1">
-                                                        <p className="wrap-break-word font-medium text-gray-900">{entry.product?.name || t('myDiary.unnamedProduct')}</p>
+                                                        <p className="wrap-break-word font-medium text-gray-900">{entry.name || t('myDiary.unnamedProduct')}</p>
                                                         <p className="mt-1 text-sm text-gray-600">
-                                                            {entry.product?.pieceName
-                                                                ? `${entry.amount} x ${entry.product.pieceName.replace('Per ', '')}`
+                                                            {entry.pieceName
+                                                                ? `${entry.amount} x ${entry.pieceName.replace('Per ', '')}`
                                                                 : t('myDiary.consumedLabel', { amount: entry.amount })}
                                                         </p>
                                                     </div>

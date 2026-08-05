@@ -3,15 +3,27 @@ import { prisma } from '../prisma/prisma.config.js';
 export class DiaryService {
 
     public async addEntry(userId: string, data: { productId: string; amount: number; date?: string }) {
+        const product = await prisma.product.findUnique({
+            where: { id: data.productId }
+        });
+
+        if (!product) {
+            throw new Error('Product not found');
+        }
+
         return await prisma.diaryEntry.create({
             data: {
                 userId,
                 productId: data.productId,
                 amount: data.amount,
-                ...(data.date && { date: new Date(data.date) })
-            },
-            include: {
-                product: true
+                ...(data.date && { date: new Date(data.date) }),
+
+                name: product.name,
+                calories: product.calories,
+                protein: product.protein || 0,
+                fat: product.fat || 0,
+                carbs: product.carbs || 0,
+                pieceName: product.pieceName
             }
         });
     }
@@ -19,9 +31,6 @@ export class DiaryService {
     public async getEntries(userId: string) {
         return await prisma.diaryEntry.findMany({
             where: { userId },
-            include: {
-                product: true
-            },
             orderBy: {
                 date: 'desc'
             }
@@ -36,25 +45,24 @@ export class DiaryService {
         }
 
         const existingEntry = await prisma.diaryEntry.findFirst({
-            where: { id, userId },
-            include: { product: true }
+            where: { id, userId }
         });
 
         if (!existingEntry) {
             return null;
         }
 
-        const isPiece = !!existingEntry.product.pieceName;
+        const isPiece = !!existingEntry.pieceName;
         const multiplier = isPiece ? weight : weight / 100;
-        const calories = (existingEntry.product.calories ?? 0) * multiplier;
-        const protein = (existingEntry.product.protein ?? 0) * multiplier;
-        const fat = (existingEntry.product.fat ?? 0) * multiplier;
-        const carbs = (existingEntry.product.carbs ?? 0) * multiplier;
+
+        const calories = existingEntry.calories * multiplier;
+        const protein = existingEntry.protein * multiplier;
+        const fat = existingEntry.fat * multiplier;
+        const carbs = existingEntry.carbs * multiplier;
 
         const updatedEntry = await prisma.diaryEntry.update({
             where: { id, userId },
-            data: { amount: weight },
-            include: { product: true }
+            data: { amount: weight }
         });
 
         return {
@@ -87,20 +95,17 @@ export class DiaryService {
                     gte: startOfDay,
                     lte: endOfDay,
                 }
-            },
-            include: {
-                product: true
             }
         });
 
         const summary = entries.reduce((acc, entry) => {
-            const isPiece = !!entry.product.pieceName;
+            const isPiece = !!entry.pieceName;
             const multiplier = isPiece ? entry.amount : entry.amount / 100;
 
-            acc.totalCalories += entry.product.calories * multiplier;
-            acc.totalProtein += (entry.product.protein || 0) * multiplier;
-            acc.totalFat += (entry.product.fat || 0) * multiplier;
-            acc.totalCarbs += (entry.product.carbs || 0) * multiplier;
+            acc.totalCalories += entry.calories * multiplier;
+            acc.totalProtein += entry.protein * multiplier;
+            acc.totalFat += entry.fat * multiplier;
+            acc.totalCarbs += entry.carbs * multiplier;
 
             return acc;
         }, { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 });

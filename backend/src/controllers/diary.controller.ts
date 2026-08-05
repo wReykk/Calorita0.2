@@ -17,7 +17,14 @@ export class DiaryController {
             if (productData) {
                 const savedProduct = await prisma.product.upsert({
                     where: { externalId: productData.externalId },
-                    update: { pieceName: productData.pieceName },
+                    update: {
+                        name: productData.name,
+                        calories: productData.calories,
+                        protein: productData.protein,
+                        fat: productData.fat,
+                        carbs: productData.carbs,
+                        pieceName: productData.pieceName
+                    },
                     create: {
                         name: productData.name,
                         calories: productData.calories,
