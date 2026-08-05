@@ -5,6 +5,15 @@ interface IngredientInput {
     amount: number;
 }
 
+export interface Recipe {
+    id: number;
+    name: string;
+    calories: number;
+    protein: number;
+    fat: number;
+    carbs: number;
+}
+
 export class RecipeService {
     public async createRecipe(userId: string, data: { name: string; totalWeight: number; ingredients: IngredientInput[] }) {
         if (!data.ingredients || data.ingredients.length === 0) {
