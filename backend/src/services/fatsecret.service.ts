@@ -49,29 +49,44 @@ export async function searchProductsInFatSecret(query: string) {
         }
     });
 
-    console.log("FATSECRET RAW DATA:", JSON.stringify(response.data, null, 2));
-
     const foods = response.data?.foods?.food;
     if (!foods) return [];
 
     const foodArray = Array.isArray(foods) ? foods : [foods];
 
     return foodArray.map((food: any) => {
-        const desc = food.food_description;
+        const desc = food.food_description || '';
 
         const getMacro = (regex: RegExp) => {
             const match = desc.match(regex);
             return match ? parseFloat(match[1]) : 0;
         };
 
+        // --- НОВАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ ШТУК ---
+        let pieceName: string | undefined = undefined;
+        // Ищем текст между "Per " и " -"
+        const portionMatch = desc.match(/^Per\s+(.*?)\s+-/i);
+
+        if (portionMatch) {
+            const portion = portionMatch[1].toLowerCase().trim();
+            // Если это не 100 грамм и не 100 мл, значит это порция/штука
+            if (!portion.includes('100g') && !portion.includes('100 g') &&
+                !portion.includes('100ml') && !portion.includes('100 ml')) {
+                pieceName = portion; // Сохранит, например, "1 medium" или "1 slice"
+            }
+        }
+        // ------------------------------------
+
         return {
+            id: food.food_id,
             externalId: food.food_id,
             name: food.food_name,
-            calories: getMacro(/Calories:\s*(\d+)kcal/i),
+            calories: getMacro(/Calories:\s*([\d.]+)kcal/i),
             protein: getMacro(/Protein:\s*([\d.]+)g/i),
             fat: getMacro(/Fat:\s*([\d.]+)g/i),
             carbs: getMacro(/Carbs:\s*([\d.]+)g/i),
             description: desc,
+            pieceName: pieceName, // <--- Теперь передаем это поле!
             isGlobal: true
         };
     });

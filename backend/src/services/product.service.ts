@@ -1,4 +1,5 @@
 import { prisma } from '../prisma/prisma.config.js';
+import { searchProductsInFatSecret } from './fatsecret.service.js';
 import axios from 'axios';
 
 export class ProductService {
@@ -67,49 +68,9 @@ export class ProductService {
 
     public async searchExternalProducts(query: string) {
         try {
-            const response = await axios.get('https://ua.openfoodfacts.org/cgi/search.pl', {
-                params: {
-                    search_terms: query,
-                    search_simple: 1,
-                    action: 'process',
-                    json: 1,
-                    page_size: 15
-                }
-            });
-
-            const products = response.data.products || [];
-
-            return products
-                .map((product: any) => {
-                    const nutriments = product.nutriments || {};
-
-                    const calories = Math.round(nutriments['energy-kcal_100g'] || nutriments['energy_100g'] || 0);
-                    const protein = Math.round((nutriments['proteins_100g'] || 0) * 10) / 10;
-                    const fat = Math.round((nutriments['fat_100g'] || 0) * 10) / 10;
-                    const carbs = Math.round((nutriments['carbohydrates_100g'] || 0) * 10) / 10;
-
-                    const name = product.product_name_ru || product.product_name_en || product.product_name || 'Unknown product';
-
-                    const brand = product.brands ? ` (${product.brands.split(',')[0]})` : '';
-
-                    return {
-                        id: product._id || product.id,
-                        externalId: product._id || product.id,
-                        name: `${name}${brand}`,
-                        calories: calories,
-                        protein: protein,
-                        fat: fat,
-                        carbs: carbs,
-                        description: `100g - Calories: ${calories}Kcal`,
-                        pieceName: undefined,
-                        isGlobal: true
-                    };
-                })
-                .filter((p: any) => p.calories > 0 && p.name !== 'Unknown product')
-                .slice(0, 10);
-
+            return await searchProductsInFatSecret(query);
         } catch (error) {
-            console.error('Error while searching Open Food Facts:', error);
+            console.error('Ошибка при поиске в FatSecret:', error);
             return [];
         }
     }
