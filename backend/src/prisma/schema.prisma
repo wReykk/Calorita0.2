@@ -46,6 +46,7 @@ model Product {
   carbs       Float?
   description String?
   createdAt   DateTime @default(now())
+    totalWeight Float?
 
   pieceWeight Float?
   pieceName   String?

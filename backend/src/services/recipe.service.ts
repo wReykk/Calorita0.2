@@ -50,9 +50,10 @@ export class RecipeService {
         return await prisma.$transaction(async (tx) => {
             const recipe = await tx.product.create({
                 data: {
-                    userId,
+                    creatorId: userId,
                     name: data.name,
                     isRecipe: true,
+                    totalWeight: data.totalWeight,
                     calories: Number((totalCalories * recipeMultiplier).toFixed(2)),
                     protein: Number((totalProtein * recipeMultiplier).toFixed(2)),
                     fat: Number((totalFat * recipeMultiplier).toFixed(2)),
@@ -86,14 +87,16 @@ export class RecipeService {
 
     public async getUserRecipes(userId: string) {
         return await prisma.product.findMany({
-            where: { userId, isRecipe: true },
+            // ИСПРАВЛЕНО: userId -> creatorId: userId
+            where: { creatorId: userId, isRecipe: true },
             orderBy: { name: 'asc' }
         });
     }
 
     public async getRecipeById(recipeId: string, userId: string) {
         const recipe = await prisma.product.findFirst({
-            where: { id: recipeId, userId, isRecipe: true },
+            // ИСПРАВЛЕНО: userId -> creatorId: userId
+            where: { id: recipeId, creatorId: userId, isRecipe: true },
             include: {
                 recipeIngredients: {
                     include: {
@@ -113,7 +116,8 @@ export class RecipeService {
         }
 
         const existingRecipe = await prisma.product.findFirst({
-            where: { id: recipeId, userId, isRecipe: true }
+            // ИСПРАВЛЕНО: userId -> creatorId: userId
+            where: { id: recipeId, creatorId: userId, isRecipe: true }
         });
 
         if (!existingRecipe) throw new Error("Recipe was not found or you don't have permission to edit it.");
@@ -143,6 +147,7 @@ export class RecipeService {
                 where: { id: recipeId },
                 data: {
                     name: data.name,
+                    totalWeight: data.totalWeight,
                     calories: Number((totalCalories * recipeMultiplier).toFixed(2)),
                     protein: Number((totalProtein * recipeMultiplier).toFixed(2)),
                     fat: Number((totalFat * recipeMultiplier).toFixed(2)),
@@ -169,7 +174,8 @@ export class RecipeService {
     public async deleteRecipe(recipeId: string, userId: string) {
         // 1. Проверяем, существует ли рецепт и принадлежит ли он пользователю
         const existingRecipe = await prisma.product.findFirst({
-            where: { id: recipeId, userId, isRecipe: true }
+            // ИСПРАВЛЕНО: userId -> creatorId: userId
+            where: { id: recipeId, creatorId: userId, isRecipe: true }
         });
 
         if (!existingRecipe) {
