@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
-import { recipeService, type RecipeDetails, type RecipePayload } from '../services/recipe.service'
+import { recipeService, type RecipeDetails } from '../services/recipe.service'
 
 type ProductOption = {
     id: string
@@ -31,12 +31,22 @@ type RecipeBuilderProps = {
 
 function RecipeBuilder({ open, onClose, onSaveSuccess, initialData }: RecipeBuilderProps) {
     const { t } = useTranslation()
-    const [name, setName] = useState('')
-    const [totalWeight, setTotalWeight] = useState(initialData?.totalWeight || '')
+    const [name, setName] = useState(() => initialData?.name ?? '')
+    const [totalWeight, setTotalWeight] = useState(() => (initialData?.totalWeight != null ? String(initialData.totalWeight) : ''))
     const [searchQuery, setSearchQuery] = useState('')
     const [searchResults, setSearchResults] = useState<ProductOption[]>([])
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-    const [ingredients, setIngredients] = useState<Ingredient[]>([])
+    const [ingredients, setIngredients] = useState<Ingredient[]>(() => initialData?.recipeIngredients.map((item) => ({
+        id: item.ingredientId,
+        productId: item.ingredientId,
+        name: item.ingredient?.name || 'Unknown product',
+        calories: item.ingredient?.calories,
+        protein: item.ingredient?.protein,
+        fat: item.ingredient?.fat,
+        carbs: item.ingredient?.carbs,
+        pieceName: item.ingredient?.pieceName,
+        amount: item.amount,
+    })) ?? [])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
 
@@ -50,36 +60,6 @@ function RecipeBuilder({ open, onClose, onSaveSuccess, initialData }: RecipeBuil
         setError('')
     }
 
-    useEffect(() => {
-        if (!open) {
-            return
-        }
-
-        if (initialData) {
-            setName(initialData.name)
-            setTotalWeight(String(initialData.totalWeight))
-            setIngredients(
-                initialData.recipeIngredients.map((item) => ({
-                    id: item.ingredientId,
-                    productId: item.ingredientId,
-                    name: item.ingredient?.name || 'Unknown product',
-                    calories: item.ingredient?.calories,
-                    protein: item.ingredient?.protein,
-                    fat: item.ingredient?.fat,
-                    carbs: item.ingredient?.carbs,
-                    pieceName: item.ingredient?.pieceName,
-                    amount: item.amount,
-                }))
-            )
-            setSearchQuery('')
-            setSearchResults([])
-            setIsDropdownOpen(false)
-            setError('')
-            return
-        }
-
-        clearForm()
-    }, [open, initialData])
 
     useEffect(() => {
         if (!open || searchQuery.trim().length < 2) {

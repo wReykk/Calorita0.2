@@ -532,6 +532,7 @@ function Products() {
             </div>
 
             <RecipeBuilder
+                key={`${isRecipeBuilderOpen}-${editingRecipe?.id ?? 'new'}`}
                 open={isRecipeBuilderOpen}
                 onClose={handleRecipeBuilderClose}
                 initialData={editingRecipe ?? undefined}
