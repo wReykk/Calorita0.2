@@ -1,18 +1,13 @@
 import type { Request, Response } from 'express';
 import { RecipeService } from '../services/recipe.service.js';
+import { type AuthRequest } from '../middlewares/auth.middleware.js';
 
 const recipeService = new RecipeService();
-
-interface AuthRequest extends Request {
-    user?: {
-        id: string;
-    };
-}
 
 export class RecipeController {
     public async createRecipe(req: AuthRequest, res: Response): Promise<void> {
         try {
-            const userId = req.user?.id;
+            const userId = req.userId;
 
             if (!userId) {
                 res.status(401).json({ message: 'You are not authorized' });
@@ -43,7 +38,7 @@ export class RecipeController {
 
     public async getUserRecipes(req: AuthRequest, res: Response): Promise<void> {
         try {
-            const userId = req.user?.id;
+            const userId = req.userId;
             if (!userId) { res.status(401).json({ message: 'You are not authorized' }); return; }
 
             const recipes = await recipeService.getUserRecipes(userId);
@@ -55,7 +50,7 @@ export class RecipeController {
 
     public async getRecipeById(req: AuthRequest, res: Response): Promise<void> {
         try {
-            const userId = req.user?.id;
+            const userId = req.userId;
             if (!userId) { res.status(401).json({ message: 'You are not authorized' }); return; }
 
             const recipe = await recipeService.getRecipeById(req.params.id as string, userId);
@@ -67,7 +62,7 @@ export class RecipeController {
 
     public async updateRecipe(req: AuthRequest, res: Response): Promise<void> {
         try {
-            const userId = req.user?.id;
+            const userId = req.userId;
             if (!userId) { res.status(401).json({ message: 'You are not authorized' }); return; }
 
             const { name, totalWeight, ingredients } = req.body;
