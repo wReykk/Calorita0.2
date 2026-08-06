@@ -77,4 +77,22 @@ export class RecipeController {
             res.status(500).json({ message: error.message });
         }
     }
+
+    public async deleteRecipe(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            const userId = req.userId;
+            if (!userId) {
+                res.status(401).json({ message: 'You are not authorized' });
+                return;
+            }
+
+            // Вызываем метод удаления из сервиса
+            await recipeService.deleteRecipe(req.params.id as string, userId);
+
+            // Отправляем успешный ответ без тела (или с простым сообщением)
+            res.status(200).json({ message: 'Recipe deleted successfully' });
+        } catch (error: any) {
+            res.status(500).json({ message: error.message });
+        }
+    }
 }

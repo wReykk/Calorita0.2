@@ -18,17 +18,20 @@ export type Recipe = {
     protein: number | null
     fat: number | null
     carbs: number | null
+    totalWeight?: number
 }
 
 export type RecipeIngredient = {
-    productId: string
+    ingredientId: string
     amount: number
-    name?: string
-    calories?: number | null
-    protein?: number | null
-    fat?: number | null
-    carbs?: number | null
-    pieceName?: string | null
+    ingredient?: {
+        name: string
+        calories?: number | null
+        protein?: number | null
+        fat?: number | null
+        carbs?: number | null
+        pieceName?: string | null
+    }
 }
 
 export type RecipeDetails = Recipe & {
@@ -55,4 +58,9 @@ export const recipeService = {
         const response = await apiClient.put<RecipeDetails>(`/recipes/${id}`, payload)
         return response.data
     },
+
+    deleteRecipe: async (id: string) => {
+        const response = await apiClient.delete(`/recipes/${id}`)
+        return response.data
+    }
 }

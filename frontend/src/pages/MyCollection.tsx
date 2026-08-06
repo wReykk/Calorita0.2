@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
 import RecipeBuilder from '../components/RecipeBuilder'
-import { recipeService, type Recipe } from '../services/recipe.service'
+import { recipeService, type Recipe, type RecipeDetails } from '../services/recipe.service'
 import { usePageTitle } from '../hooks/usePageTitle' // убрал .js, в TS обычно без расширения
 
 type Product = {
@@ -50,6 +50,8 @@ function Products() {
     const [recipesLoading, setRecipesLoading] = useState(false)
     const [recipesError, setRecipesError] = useState('')
     const [isRecipeBuilderOpen, setIsRecipeBuilderOpen] = useState(false)
+    const [editingRecipe, setEditingRecipe] = useState<RecipeDetails | null>(null)
+    const [recipeBuilderError, setRecipeBuilderError] = useState('')
 
     const { t } = useTranslation()
     usePageTitle(t('home.pageTitle', 'My Collection'))
@@ -128,6 +130,30 @@ function Products() {
         }
     }
 
+    const handleCreateRecipe = () => {
+        setEditingRecipe(null)
+        setRecipeBuilderError('')
+        setIsRecipeBuilderOpen(true)
+    }
+
+    const handleEditRecipe = async (recipeId: string) => {
+        setRecipeBuilderError('')
+
+        try {
+            const recipeData = await recipeService.getRecipe(recipeId)
+            setEditingRecipe(recipeData)
+            setIsRecipeBuilderOpen(true)
+        } catch {
+            setRecipeBuilderError(t('products.errorLoadRecipe', 'Failed to load recipe details'))
+        }
+    }
+
+    const handleRecipeBuilderClose = () => {
+        setIsRecipeBuilderOpen(false)
+        setEditingRecipe(null)
+        setRecipeBuilderError('')
+    }
+
     const startEdit = (product: Product) => {
         setEditState({
             productId: product.id,
@@ -204,7 +230,7 @@ function Products() {
                             </div>
                             <button
                                 type="button"
-                                onClick={() => setIsRecipeBuilderOpen(true)}
+                                onClick={handleCreateRecipe}
                                 className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
                             >
                                 {t('products.createRecipe', 'Create Recipe')}
@@ -212,6 +238,12 @@ function Products() {
                         </div>
 
                         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                            {recipeBuilderError ? (
+                                <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                                    {recipeBuilderError}
+                                </div>
+                            ) : null}
+
                             {recipesLoading ? (
                                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-gray-600">
                                     {t('products.loading')}
@@ -232,7 +264,18 @@ function Products() {
                                                 <span className="text-2xl">🍲</span>
                                             </div>
                                             <div className="space-y-3 p-5">
-                                                <h3 className="text-lg font-semibold text-slate-900">{recipe.name}</h3>
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <h3 className="text-lg font-semibold text-slate-900">{recipe.name}</h3>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            void handleEditRecipe(recipe.id)
+                                                        }}
+                                                        className="rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                                                    >
+                                                        {t('products.edit')}
+                                                    </button>
+                                                </div>
 
                                                 {/* Вывод макросов для рецепта на 100г */}
                                                 <div className="grid grid-cols-2 gap-2 text-sm text-slate-600 mt-2">
@@ -490,8 +533,11 @@ function Products() {
 
             <RecipeBuilder
                 open={isRecipeBuilderOpen}
-                onClose={() => setIsRecipeBuilderOpen(false)}
+                onClose={handleRecipeBuilderClose}
+                initialData={editingRecipe ?? undefined}
                 onSaveSuccess={() => {
+                    setEditingRecipe(null)
+                    setRecipeBuilderError('')
                     fetchRecipes()
                     setActiveTab('recipes')
                 }}

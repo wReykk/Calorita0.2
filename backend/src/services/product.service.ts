@@ -6,7 +6,7 @@ export class ProductService {
 
     public async getAllProducts(userId: string) {
         return await prisma.product.findMany({
-            where: { userId }
+            where: { userId: userId, isRecipe: false }
         });
     }
 

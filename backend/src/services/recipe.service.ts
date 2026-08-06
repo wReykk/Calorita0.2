@@ -107,7 +107,6 @@ export class RecipeService {
         return recipe;
     }
 
-    // Обновить существующий рецепт
     public async updateRecipe(recipeId: string, userId: string, data: { name: string; totalWeight: number; ingredients: IngredientInput[] }) {
         if (!data.ingredients || data.ingredients.length === 0) {
             throw new Error('Recipe must contain at least 1 ingedient.');
@@ -164,6 +163,30 @@ export class RecipeService {
             await tx.recipeIngredient.createMany({ data: ingredientsData });
 
             return updatedRecipe;
+        });
+    }
+
+    public async deleteRecipe(recipeId: string, userId: string) {
+        // 1. Проверяем, существует ли рецепт и принадлежит ли он пользователю
+        const existingRecipe = await prisma.product.findFirst({
+            where: { id: recipeId, userId, isRecipe: true }
+        });
+
+        if (!existingRecipe) {
+            throw new Error("Recipe was not found or you don't have permission to delete it.");
+        }
+
+        // 2. Удаляем рецепт и все его ингредиенты внутри транзакции
+        return await prisma.$transaction(async (tx) => {
+            // Сначала удаляем связи (ингредиенты)
+            await tx.recipeIngredient.deleteMany({
+                where: { recipeId: recipeId }
+            });
+
+            // Затем удаляем сам рецепт из таблицы продуктов
+            return await tx.product.delete({
+                where: { id: recipeId }
+            });
         });
     }
 }

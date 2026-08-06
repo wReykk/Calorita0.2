@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
-import { recipeService, type RecipePayload } from '../services/recipe.service'
+import { recipeService, type RecipeDetails, type RecipePayload } from '../services/recipe.service'
 
 type ProductOption = {
     id: string
@@ -26,12 +26,13 @@ type RecipeBuilderProps = {
     open: boolean
     onClose: () => void
     onSaveSuccess: () => void
+    initialData?: RecipeDetails
 }
 
-function RecipeBuilder({ open, onClose, onSaveSuccess }: RecipeBuilderProps) {
+function RecipeBuilder({ open, onClose, onSaveSuccess, initialData }: RecipeBuilderProps) {
     const { t } = useTranslation()
     const [name, setName] = useState('')
-    const [totalWeight, setTotalWeight] = useState('')
+    const [totalWeight, setTotalWeight] = useState(initialData?.totalWeight || '')
     const [searchQuery, setSearchQuery] = useState('')
     const [searchResults, setSearchResults] = useState<ProductOption[]>([])
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -48,6 +49,37 @@ function RecipeBuilder({ open, onClose, onSaveSuccess }: RecipeBuilderProps) {
         setIngredients([])
         setError('')
     }
+
+    useEffect(() => {
+        if (!open) {
+            return
+        }
+
+        if (initialData) {
+            setName(initialData.name)
+            setTotalWeight(String(initialData.totalWeight))
+            setIngredients(
+                initialData.recipeIngredients.map((item) => ({
+                    id: item.ingredientId,
+                    productId: item.ingredientId,
+                    name: item.ingredient?.name || 'Unknown product',
+                    calories: item.ingredient?.calories,
+                    protein: item.ingredient?.protein,
+                    fat: item.ingredient?.fat,
+                    carbs: item.ingredient?.carbs,
+                    pieceName: item.ingredient?.pieceName,
+                    amount: item.amount,
+                }))
+            )
+            setSearchQuery('')
+            setSearchResults([])
+            setIsDropdownOpen(false)
+            setError('')
+            return
+        }
+
+        clearForm()
+    }, [open, initialData])
 
     useEffect(() => {
         if (!open || searchQuery.trim().length < 2) {
@@ -153,7 +185,12 @@ function RecipeBuilder({ open, onClose, onSaveSuccess }: RecipeBuilderProps) {
                 ingredients: ingredients.map((item) => ({ productId: item.productId, amount: item.amount })),
             }
 
-            await recipeService.createRecipe(payload)
+            if (initialData?.id) {
+                await recipeService.updateRecipe(initialData.id, payload)
+            } else {
+                await recipeService.createRecipe(payload)
+            }
+
             onSaveSuccess()
             handleClose()
         } catch {
@@ -162,6 +199,22 @@ function RecipeBuilder({ open, onClose, onSaveSuccess }: RecipeBuilderProps) {
             setLoading(false)
         }
     }
+
+    const handleDelete = async () => {
+        if (!initialData?.id) return;
+
+        if (window.confirm('Are you sure you want to delete this recipe?')) {
+            try {
+                await recipeService.deleteRecipe(initialData.id);
+
+                onSaveSuccess();
+                onClose();
+
+            } catch (error) {
+                console.error('Failed to delete recipe', error);
+            }
+        }
+    };
 
     if (!open) {
         return null
@@ -173,8 +226,8 @@ function RecipeBuilder({ open, onClose, onSaveSuccess }: RecipeBuilderProps) {
             <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-4xl bg-white shadow-2xl">
                 <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
                     <div>
-                        <h2 className="text-xl font-semibold text-slate-900">{t('recipeBuilder.title', 'Recipe Builder')}</h2>
-                        <p className="text-sm text-slate-600">{t('recipeBuilder.subtitle', 'Add ingredients and save a new recipe.')}</p>
+                        <h2 className="text-xl font-semibold text-slate-900">{initialData ? t('recipeBuilder.titleEdit', 'Edit Recipe') : t('recipeBuilder.title', 'Recipe Builder')}</h2>
+                        <p className="text-sm text-slate-600">{initialData ? t('recipeBuilder.subtitleEdit', 'Update the recipe details and ingredients.') : t('recipeBuilder.subtitle', 'Add ingredients and save a new recipe.')}</p>
                     </div>
                     <button
                         type="button"
@@ -324,20 +377,36 @@ function RecipeBuilder({ open, onClose, onSaveSuccess }: RecipeBuilderProps) {
                     ) : null}
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            {loading ? t('recipeBuilder.saving', 'Saving...') : t('recipeBuilder.save', 'Save')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleClose}
-                            className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                        >
-                            {t('recipeBuilder.cancel', 'Cancel')}
-                        </button>
+                        {/* Кнопка Delete (показывается только при редактировании) */}
+                        {initialData?.id ? (
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                disabled={loading}
+                                className="rounded-2xl border border-red-200 bg-white px-5 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:opacity-60"
+                            >
+                                {t('recipeBuilder.delete', 'Delete Recipe')}
+                            </button>
+                        ) : (
+                            <div /> // Пустой блок, чтобы flex-justify-between корректно расставил остальные кнопки вправо
+                        )}
+
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={handleClose}
+                                className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                            >
+                                {t('recipeBuilder.cancel', 'Cancel')}
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {loading ? t('recipeBuilder.saving', 'Saving...') : t('recipeBuilder.save', 'Save')}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
