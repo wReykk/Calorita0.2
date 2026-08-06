@@ -179,11 +179,21 @@ function RecipeBuilder({ open, onClose, onSaveSuccess, initialData }: RecipeBuil
         setLoading(true)
 
         try {
-            const payload: RecipePayload = {
-                name: name.trim(),
+            const payload = {
+                name: name.trim(), // или как у тебя называется переменная
                 totalWeight: parsedWeight,
-                ingredients: ingredients.map((item) => ({ productId: item.productId, amount: item.amount })),
-            }
+                ingredients: ingredients.map(ing => ({
+                    productId: String(ing.id),
+                    amount: ing.amount,
+                    // ДОБАВЛЯЕМ ВОТ ЭТИ ПОЛЯ (чтобы бэкенд мог создать продукт):
+                    name: ing.name,
+                    calories: ing.calories,
+                    protein: ing.protein,
+                    fat: ing.fat,
+                    carbs: ing.carbs,
+                    pieceName: ing.pieceName
+                }))
+            };
 
             if (initialData?.id) {
                 await recipeService.updateRecipe(initialData.id, payload)

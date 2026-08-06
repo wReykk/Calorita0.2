@@ -3,6 +3,13 @@ import { prisma } from '../prisma/prisma.config.js';
 interface IngredientInput {
     productId: string;
     amount: number;
+    // Добавлены поля для сохранения продуктов из FatSecret
+    name?: string;
+    calories?: number;
+    protein?: number;
+    fat?: number;
+    carbs?: number;
+    pieceName?: string;
 }
 
 export interface Recipe {
@@ -17,25 +24,42 @@ export interface Recipe {
 export class RecipeService {
     public async createRecipe(userId: string, data: { name: string; totalWeight: number; ingredients: IngredientInput[] }) {
         if (!data.ingredients || data.ingredients.length === 0) {
-            throw new Error('Recipe must contain at least 1 ingedient.');
+            throw new Error('Recipe must contain at least 1 ingredient.');
         }
 
-        const productIds = data.ingredients.map(i => i.productId);
-        const products = await prisma.product.findMany({
-            where: { id: { in: productIds } }
-        });
-
-        if (products.length !== productIds.length) {
-            throw new Error('Some ingredients were not found in data base.');
-        }
-
-        let totalCalories = 0;
-        let totalProtein = 0;
-        let totalFat = 0;
-        let totalCarbs = 0;
-
+        let totalCalories = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
+        const resolvedIngredients: { localProductId: string; amount: number }[] = [];
+        // Проходим по каждому ингредиенту по очереди
         for (const item of data.ingredients) {
-            const product = products.find(p => p.id === item.productId)!;
+            // 1. Ищем продукт в локальной БД
+            let product = await prisma.product.findFirst({
+                where: { id: item.productId }
+            });
+
+            // 2. Если его нет (это продукт из FatSecret) - создаем локальную копию
+            if (!product) {
+                if (!item.name || item.calories === undefined) {
+                    throw new Error(`Ingredient data is missing for external product ${item.productId}`);
+                }
+                product = await prisma.product.create({
+                    data: {
+                        creatorId: userId,
+                        name: item.name,
+                        calories: item.calories,
+                        protein: item.protein ?? 0,
+                        fat: item.fat ?? 0,
+                        carbs: item.carbs ?? 0,
+                        pieceName: item.pieceName ?? null,
+                        isGlobal: true,
+                        isRecipe: false
+                    }
+                });
+            }
+
+            resolvedIngredients.push({
+                localProductId: product.id,
+                amount: item.amount
+            });
 
             const isPiece = !!product.pieceName;
             const multiplier = isPiece ? item.amount : item.amount / 100;
@@ -45,6 +69,7 @@ export class RecipeService {
             totalFat += (product.fat ?? 0) * multiplier;
             totalCarbs += (product.carbs ?? 0) * multiplier;
         }
+
         const recipeMultiplier = 100 / data.totalWeight;
 
         return await prisma.$transaction(async (tx) => {
@@ -62,9 +87,10 @@ export class RecipeService {
                 }
             });
 
-            const ingredientsData = data.ingredients.map(item => ({
+            // Используем локальные ID, которые мы собрали в цикле
+            const ingredientsData = resolvedIngredients.map(item => ({
                 recipeId: recipe.id,
-                ingredientId: item.productId,
+                ingredientId: item.localProductId,
                 amount: item.amount
             }));
 
@@ -74,20 +100,13 @@ export class RecipeService {
 
             return await tx.product.findUnique({
                 where: { id: recipe.id },
-                include: {
-                    recipeIngredients: {
-                        include: {
-                            ingredient: true
-                        }
-                    }
-                }
+                include: { recipeIngredients: { include: { ingredient: true } } }
             });
         });
     }
 
     public async getUserRecipes(userId: string) {
         return await prisma.product.findMany({
-            // ИСПРАВЛЕНО: userId -> creatorId: userId
             where: { creatorId: userId, isRecipe: true },
             orderBy: { name: 'asc' }
         });
@@ -95,7 +114,6 @@ export class RecipeService {
 
     public async getRecipeById(recipeId: string, userId: string) {
         const recipe = await prisma.product.findFirst({
-            // ИСПРАВЛЕНО: userId -> creatorId: userId
             where: { id: recipeId, creatorId: userId, isRecipe: true },
             include: {
                 recipeIngredients: {
@@ -112,25 +130,46 @@ export class RecipeService {
 
     public async updateRecipe(recipeId: string, userId: string, data: { name: string; totalWeight: number; ingredients: IngredientInput[] }) {
         if (!data.ingredients || data.ingredients.length === 0) {
-            throw new Error('Recipe must contain at least 1 ingedient.');
+            throw new Error('Recipe must contain at least 1 ingredient.');
         }
 
         const existingRecipe = await prisma.product.findFirst({
-            // ИСПРАВЛЕНО: userId -> creatorId: userId
             where: { id: recipeId, creatorId: userId, isRecipe: true }
         });
 
         if (!existingRecipe) throw new Error("Recipe was not found or you don't have permission to edit it.");
 
-        const productIds = data.ingredients.map(i => i.productId);
-        const products = await prisma.product.findMany({
-            where: { id: { in: productIds } }
-        });
-
         let totalCalories = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
-
+        const resolvedIngredients: { localProductId: string; amount: number }[] = [];
         for (const item of data.ingredients) {
-            const product = products.find(p => p.id === item.productId)!;
+            let product = await prisma.product.findFirst({
+                where: { id: item.productId }
+            });
+
+            if (!product) {
+                if (!item.name || item.calories === undefined) {
+                    throw new Error(`Ingredient data is missing for external product ${item.productId}`);
+                }
+                product = await prisma.product.create({
+                    data: {
+                        creatorId: userId,
+                        name: item.name,
+                        calories: item.calories,
+                        protein: item.protein ?? 0,
+                        fat: item.fat ?? 0,
+                        carbs: item.carbs ?? 0,
+                        pieceName: item.pieceName ?? null,
+                        isGlobal: true,
+                        isRecipe: false
+                    }
+                });
+            }
+
+            resolvedIngredients.push({
+                localProductId: product.id,
+                amount: item.amount
+            });
+
             const isPiece = !!product.pieceName;
             const multiplier = isPiece ? item.amount : item.amount / 100;
 
@@ -159,9 +198,9 @@ export class RecipeService {
                 where: { recipeId: recipeId }
             });
 
-            const ingredientsData = data.ingredients.map(item => ({
+            const ingredientsData = resolvedIngredients.map(item => ({
                 recipeId: recipeId,
-                ingredientId: item.productId,
+                ingredientId: item.localProductId,
                 amount: item.amount
             }));
 
@@ -172,9 +211,7 @@ export class RecipeService {
     }
 
     public async deleteRecipe(recipeId: string, userId: string) {
-        // 1. Проверяем, существует ли рецепт и принадлежит ли он пользователю
         const existingRecipe = await prisma.product.findFirst({
-            // ИСПРАВЛЕНО: userId -> creatorId: userId
             where: { id: recipeId, creatorId: userId, isRecipe: true }
         });
 
@@ -182,14 +219,11 @@ export class RecipeService {
             throw new Error("Recipe was not found or you don't have permission to delete it.");
         }
 
-        // 2. Удаляем рецепт и все его ингредиенты внутри транзакции
         return await prisma.$transaction(async (tx) => {
-            // Сначала удаляем связи (ингредиенты)
             await tx.recipeIngredient.deleteMany({
                 where: { recipeId: recipeId }
             });
 
-            // Затем удаляем сам рецепт из таблицы продуктов
             return await tx.product.delete({
                 where: { id: recipeId }
             });
