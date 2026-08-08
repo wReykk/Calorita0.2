@@ -106,6 +106,7 @@ model User {
   products Product[]
 
   diaryEntry DiaryEntry[]
+  weightLogs WeightLog[]
 }
 
 model DiaryEntry {
@@ -128,4 +129,15 @@ model DiaryEntry {
   fat       Float
   carbs     Float
   pieceName String?
+}
+
+model WeightLog {
+  id        String   @id @default(uuid())
+  weight    Float    // Вес в этот день
+  date      DateTime @default(now()) // Дата взвешивания
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }

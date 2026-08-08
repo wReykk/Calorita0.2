@@ -78,6 +78,11 @@ export const updateUserParameters = async (id: string, data: any) => {
             dailyProtein: macros.dailyProtein,
             dailyFat: macros.dailyFat,
             dailyCarbs: macros.dailyCarbs,
+            weightLogs: {
+                create: {
+                    weight: Number(weight)
+                }
+            }
         },
     });
 
