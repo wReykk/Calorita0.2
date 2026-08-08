@@ -107,6 +107,7 @@ model User {
 
   diaryEntry DiaryEntry[]
   weightLogs WeightLog[]
+  waterLogs WaterLog[]
 }
 
 model DiaryEntry {
@@ -133,11 +134,20 @@ model DiaryEntry {
 
 model WeightLog {
   id        String   @id @default(uuid())
-  weight    Float    // Вес в этот день
-  date      DateTime @default(now()) // Дата взвешивания
+  weight    Float
+  date      DateTime @default(now())
 
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+}
+
+model WaterLog {
+  id        String   @id @default(uuid())
+  amount    Int     
+  date      DateTime @default(now()) 
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
