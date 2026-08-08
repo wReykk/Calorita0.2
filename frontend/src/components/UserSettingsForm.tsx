@@ -317,6 +317,7 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                             id="weight"
                             type="number"
                             min="1"
+                            step="0.1"
                             value={form.weight}
                             onChange={handleChange('weight')}
                             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"

@@ -1,14 +1,52 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { usePageTitle } from '../hooks/usePageTitle.js'
+import apiClient from '../assets/api/client' // Проверь правильность пути к apiClient
+import WeightChart from '../components/WeightChart.js' // Проверь правильность пути к компоненту графика
+
+// Тип для данных пользователя, которые нам нужны для графика
+interface UserChartData {
+    targetWeight?: number | null;
+    weightLogs: {
+        id: string;
+        weight: number;
+        date: string;
+    }[];
+}
 
 function Home() {
-
     const navigate = useNavigate()
     const { t } = useTranslation()
     const isLoggedIn = Boolean(localStorage.getItem('token'))
     usePageTitle(t('home.pageTitle', 'Home'))
 
+    // Добавляем стейт для хранения данных пользователя
+    const [userData, setUserData] = useState<UserChartData | null>(null)
+    const [isLoadingData, setIsLoadingData] = useState(false)
+
+    // Загружаем данные пользователя, если он залогинен
+    useEffect(() => {
+        if (!isLoggedIn) return;
+
+        const fetchUserData = async () => {
+            setIsLoadingData(true)
+            try {
+                // Обрати внимание, я поменял '/users/me' на '/me', так как на скриншоте у тебя запрос идет на /me
+                const response = await apiClient.get('/users/me')
+
+                // ИСПРАВЛЕНИЕ ЗДЕСЬ: добавляем .user
+                setUserData(response.data.user)
+
+            } catch (error) {
+                console.error('Failed to fetch user data for chart:', error)
+            } finally {
+                setIsLoadingData(false)
+            }
+        }
+
+        void fetchUserData()
+    }, [isLoggedIn])
 
     if (!isLoggedIn) {
         return (
@@ -76,11 +114,23 @@ function Home() {
                     </button>
                 </div>
 
+                {/* --- Блок с графиком веса --- */}
+                <div className="mt-8">
+                    {isLoadingData ? (
+                        <div className="flex h-72 w-full items-center justify-center rounded-3xl border border-gray-200 bg-white shadow-sm">
+                            <p className="text-sm text-gray-500">{t('common.loading', 'Loading...')}</p>
+                        </div>
+                    ) : (
+                        <WeightChart
+                            logs={userData?.weightLogs || []}
+                            targetWeight={userData?.targetWeight}
+                        />
+                    )}
+                </div>
+
             </div>
         </div>
     )
 }
-
-
 
 export default Home
