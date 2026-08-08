@@ -5,6 +5,7 @@ import authRoutes from './routes/auth.routes.js';
 import { errorHandler } from './middlewares/error.middleware.js';
 import diaryRouter from './routes/diary.routes.js';
 import userRoutes from './routes/user.routes.js'
+import waterRoutes from './routes/water.routes.js'
 import 'dotenv/config';
 import recipeRoutes from './routes/recipe.routes.js';
 
@@ -18,6 +19,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/diary', diaryRouter);
 app.use('/api/recipes', recipeRoutes);
+app.use('/api/water', waterRoutes)
 
 // app.get('/ping', (req, res) => res.send('pong'))
 

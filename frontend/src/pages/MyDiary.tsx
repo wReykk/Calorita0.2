@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
 import DailyProgress from '../components/DailyProgress'
 import { usePageTitle } from '../hooks/usePageTitle.js'
+import WaterTracker from '../components/WaterTracker.js'
 
 
 type DiaryEntry = {
@@ -347,7 +348,17 @@ function MyDiary() {
 
             <div className="grid gap-6">
                 <div className="space-y-4">
-                    <DailyProgress targetMacros={targetMacros} consumedMacros={consumedMacros} />
+                    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+                        {/* Макросы: min-w-0 не дает блоку вывалиться за пределы своих 2/3 */}
+                        <div className="min-w-0 lg:col-span-2">
+                            <DailyProgress targetMacros={targetMacros} consumedMacros={consumedMacros} />
+                        </div>
+
+                        {/* Вода: min-w-0 удерживает блок в рамках 1/3 */}
+                        <div className="min-w-0 lg:col-span-1 flex">
+                            <WaterTracker />
+                        </div>
+                    </div>
 
                     <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                         <h2 className="text-lg font-semibold text-gray-900">{t('myDiary.logEntryTitle')}</h2>

@@ -41,3 +41,38 @@ export const addWaterLog = async (userId: string, amount: number) => {
 
     return newLog;
 };
+
+export const removeWaterLog = async (userId: string, amount: number) => {
+    if (!amount || amount <= 0) {
+        throw new Error('INVALID_AMOUNT');
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Ищем самую последнюю добавленную запись с таким же объемом за сегодня
+    const logToDelete = await prisma.waterLog.findFirst({
+        where: {
+            userId,
+            amount: Number(amount),
+            date: {
+                gte: today
+            }
+        },
+        orderBy: {
+            date: 'desc' // Сортируем от новых к старым, чтобы удалить последнюю
+        }
+    });
+
+    // Если такой записи нет, ничего не делаем (бросаем ошибку)
+    if (!logToDelete) {
+        throw new Error('LOG_NOT_FOUND');
+    }
+
+    // Удаляем найденную запись
+    await prisma.waterLog.delete({
+        where: { id: logToDelete.id }
+    });
+
+    return true;
+};

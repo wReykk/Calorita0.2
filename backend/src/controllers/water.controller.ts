@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { AuthRequest } from '../middlewares/auth.middleware.js';
-import { getTodayWaterIntake, addWaterLog } from '../services/water.service.js';
+import { getTodayWaterIntake, addWaterLog, removeWaterLog } from '../services/water.service.js';
 
 export const getWater = async (req: AuthRequest, res: Response) => {
     try {
@@ -18,7 +18,7 @@ export const getWater = async (req: AuthRequest, res: Response) => {
     }
 }
 
-export const postWater = async (req: AuthRequest, res: Response) => {
+export const addWater = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.userId;
 
@@ -35,5 +35,23 @@ export const postWater = async (req: AuthRequest, res: Response) => {
         res.json({ success: true, total: newTotal });
     } catch (error) {
         res.status(400).json({ error: 'Failed to add water' });
+    }
+}
+
+export const deleteWater = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.userId;
+        if (!userId) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        const amount = Number(req.params.amount);
+
+        await removeWaterLog(userId, amount);
+
+        const newTotal = await getTodayWaterIntake(userId);
+        res.json({ success: true, total: newTotal });
+    } catch (error) {
+        res.status(400).json({ error: 'Failed to remove water or no matching record found' });
     }
 }
