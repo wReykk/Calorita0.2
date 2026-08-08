@@ -2,11 +2,20 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import apiClient from '../assets/api/client';
 
-export default function WaterTracker() {
+// 1. Описываем пропсы: виджет теперь ждет дату снаружи
+interface WaterTrackerProps {
+    selectedDate?: Date | string;
+}
+
+// 2. Принимаем selectedDate
+export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
     const { t } = useTranslation();
     const [waterTotal, setWaterTotal] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+    // 3. Форматируем дату для бэкенда (или берем сегодняшнюю по умолчанию)
+    const activeDate = selectedDate ? new Date(selectedDate).toISOString() : new Date().toISOString();
 
     const DAILY_GOAL = 2000;
     const progressPercentage = Math.min((waterTotal / DAILY_GOAL) * 100, 100);
@@ -14,7 +23,8 @@ export default function WaterTracker() {
     useEffect(() => {
         const fetchWater = async () => {
             try {
-                const response = await apiClient.get('/water/today');
+                // 4. Передаем дату в запросе
+                const response = await apiClient.get(`/water/today?date=${activeDate}`);
                 setWaterTotal(response.data.total);
             } catch (error) {
                 console.error('Failed to fetch water:', error);
@@ -24,7 +34,7 @@ export default function WaterTracker() {
         };
 
         void fetchWater();
-    }, []);
+    }, [activeDate]); // 5. Перезагружаем данные, когда дата меняется!
 
     const handleAddWater = async (amount: number) => {
         if (isProcessing) return;
@@ -32,7 +42,8 @@ export default function WaterTracker() {
 
         try {
             setWaterTotal(prev => prev + amount);
-            await apiClient.post('/water', { amount });
+            // 6. Передаем дату при добавлении
+            await apiClient.post('/water', { amount, date: activeDate });
         } catch (error) {
             console.error('Failed to add water:', error);
             setWaterTotal(prev => prev - amount);
@@ -42,22 +53,24 @@ export default function WaterTracker() {
     };
 
     const handleRemoveWater = async (amount: number) => {
-        if (isProcessing || waterTotal < amount) return;
+        if (isProcessing || waterTotal === 0) return;
         setIsProcessing(true);
 
+        const amountToRemove = Math.min(amount, waterTotal);
+
         try {
-            // Оптимистичное удаление
-            setWaterTotal(prev => Math.max(0, prev - amount));
-            // Отправляем DELETE запрос (в URL передаем объем)
-            await apiClient.delete(`/water/${amount}`);
+            setWaterTotal(prev => prev - amountToRemove);
+            // 7. Передаем дату при удалении
+            await apiClient.delete(`/water/${amountToRemove}?date=${activeDate}`);
         } catch (error) {
             console.error('Failed to remove water:', error);
-            // Если на сервере не нашлось такой записи, возвращаем воду обратно
-            setWaterTotal(prev => prev + amount);
+            setWaterTotal(prev => prev + amountToRemove);
         } finally {
             setIsProcessing(false);
         }
     };
+
+    // ... остальной код рендера остается без изменений
 
     if (isLoading) {
         return (
@@ -70,16 +83,16 @@ export default function WaterTracker() {
     return (
         <div className="flex h-full flex-col justify-between w-full rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div>
-                <div className="mb-6 flex flex-col gap-1">
-                    <h3 className="text-lg font-semibold text-slate-900">
+                <div className="mb-8">
+                    <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
                         {t('waterTracker.title', 'Water Intake')}
-                    </h3>
-                    <p className="text-sm text-slate-500">
+                    </h2>
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
                         {t('waterTracker.subtitle', 'Stay hydrated throughout the day')}
                     </p>
                 </div>
 
-                <div className="mb-4 flex items-end justify-between">
+                <div className="my-4 flex items-end justify-between">
                     <div className="flex items-baseline gap-1">
                         <span className="text-3xl font-bold text-blue-500">{waterTotal}</span>
                         <span className="text-sm font-medium text-slate-500">/ {DAILY_GOAL} ml</span>
@@ -91,7 +104,7 @@ export default function WaterTracker() {
                     )}
                 </div>
 
-                <div className="mb-6 h-4 w-full overflow-hidden rounded-full bg-slate-100">
+                <div className="mb-8 mt-5 h-4 w-full overflow-hidden rounded-full bg-slate-100">
                     <div
                         className="h-full bg-blue-500 transition-all duration-500 ease-out"
                         style={{ width: `${progressPercentage}%` }}
@@ -130,21 +143,21 @@ export default function WaterTracker() {
                 {/* Ряд удаления (более бледный/красный дизайн) */}
                 <button
                     onClick={() => handleRemoveWater(250)}
-                    disabled={isProcessing || waterTotal < 250}
+                    disabled={isProcessing || waterTotal === 0}
                     className="flex flex-col items-center justify-center rounded-2xl bg-slate-50 py-2 text-slate-400 transition hover:bg-red-50 hover:text-red-500 active:scale-95 disabled:opacity-30 disabled:hover:bg-slate-50 disabled:hover:text-slate-400"
                 >
                     <span className="text-xs font-semibold">-250</span>
                 </button>
                 <button
                     onClick={() => handleRemoveWater(330)}
-                    disabled={isProcessing || waterTotal < 330}
+                    disabled={isProcessing || waterTotal === 0}
                     className="flex flex-col items-center justify-center rounded-2xl bg-slate-50 py-2 text-slate-400 transition hover:bg-red-50 hover:text-red-500 active:scale-95 disabled:opacity-30 disabled:hover:bg-slate-50 disabled:hover:text-slate-400"
                 >
                     <span className="text-xs font-semibold">-330</span>
                 </button>
                 <button
                     onClick={() => handleRemoveWater(500)}
-                    disabled={isProcessing || waterTotal < 500}
+                    disabled={isProcessing || waterTotal === 0}
                     className="flex flex-col items-center justify-center rounded-2xl bg-slate-50 py-2 text-slate-400 transition hover:bg-red-50 hover:text-red-500 active:scale-95 disabled:opacity-30 disabled:hover:bg-slate-50 disabled:hover:text-slate-400"
                 >
                     <span className="text-xs font-semibold">-500</span>

@@ -1,17 +1,14 @@
-import type { Request, Response } from 'express';
-import type { AuthRequest } from '../middlewares/auth.middleware.js';
+import type { Response } from 'express';
+import type { AuthRequest } from '../middlewares/auth.middleware.js'; // Проверь свой путь
 import { getTodayWaterIntake, addWaterLog, removeWaterLog } from '../services/water.service.js';
 
 export const getWater = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.userId;
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-        if (!userId) {
-            res.status(401).json({ message: 'You are not authorized' });
-            return;
-        }
-
-        const total = await getTodayWaterIntake(userId as string);
+        const date = req.query.date as string; // Ловим дату из URL
+        const total = await getTodayWaterIntake(userId, date);
         res.json({ total });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch water data' });
@@ -21,17 +18,13 @@ export const getWater = async (req: AuthRequest, res: Response) => {
 export const addWater = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.userId;
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-        if (!userId) {
-            res.status(401).json({ message: 'You are not authorized' });
-            return;
-        }
+        const { amount, date } = req.body;
 
-        const { amount } = req.body;
+        await addWaterLog(userId, amount, date);
 
-        await addWaterLog(userId, amount);
-
-        const newTotal = await getTodayWaterIntake(userId);
+        const newTotal = await getTodayWaterIntake(userId, date);
         res.json({ success: true, total: newTotal });
     } catch (error) {
         res.status(400).json({ error: 'Failed to add water' });
@@ -41,17 +34,16 @@ export const addWater = async (req: AuthRequest, res: Response) => {
 export const deleteWater = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.userId;
-        if (!userId) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
         const amount = Number(req.params.amount);
+        const date = req.query.date as string; // Ловим дату из URL
 
-        await removeWaterLog(userId, amount);
+        await removeWaterLog(userId, amount, date);
 
-        const newTotal = await getTodayWaterIntake(userId);
+        const newTotal = await getTodayWaterIntake(userId, date);
         res.json({ success: true, total: newTotal });
     } catch (error) {
-        res.status(400).json({ error: 'Failed to remove water or no matching record found' });
+        res.status(400).json({ error: 'Failed to remove water' });
     }
 }

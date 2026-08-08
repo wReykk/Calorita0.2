@@ -348,15 +348,15 @@ function MyDiary() {
 
             <div className="grid gap-6">
                 <div className="space-y-4">
-                    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-                        {/* Макросы: min-w-0 не дает блоку вывалиться за пределы своих 2/3 */}
+                    {/* Убрали items-start, теперь колонки снова равны по высоте! */}
+                    <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
                         <div className="min-w-0 lg:col-span-2">
                             <DailyProgress targetMacros={targetMacros} consumedMacros={consumedMacros} />
                         </div>
 
-                        {/* Вода: min-w-0 удерживает блок в рамках 1/3 */}
-                        <div className="min-w-0 lg:col-span-1 flex">
-                            <WaterTracker />
+                        <div className="min-w-0 lg:col-span-1">
+                            {/* WaterTracker сам растянется благодаря h-full внутри него */}
+                            <WaterTracker selectedDate={selectedDate} />
                         </div>
                     </div>
 

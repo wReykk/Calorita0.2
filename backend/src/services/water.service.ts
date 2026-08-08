@@ -2,77 +2,55 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export const getTodayWaterIntake = async (userId: string) => {
-    // Определяем начало и конец сегодняшнего дня (от 00:00 до 23:59)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+// Вспомогательная функция для получения начала и конца нужного дня
+const getDayBounds = (dateParam?: string) => {
+    const date = dateParam ? new Date(dateParam) : new Date();
+    date.setHours(0, 0, 0, 0); // Начало дня
 
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrow = new Date(date);
+    tomorrow.setDate(tomorrow.getDate() + 1); // Начало следующего дня
 
-    // Ищем все записи пользователя за сегодня
+    return { date, tomorrow };
+};
+
+export const getTodayWaterIntake = async (userId: string, dateParam?: string) => {
+    const { date, tomorrow } = getDayBounds(dateParam);
+
     const logs = await prisma.waterLog.findMany({
         where: {
             userId,
             date: {
-                gte: today,
+                gte: date,
                 lt: tomorrow
             }
         }
     });
 
-    // Считаем общую сумму миллилитров
-    const total = logs.reduce((sum, log) => sum + log.amount, 0);
-
-    return total;
+    return logs.reduce((sum, log) => sum + log.amount, 0);
 };
 
-export const addWaterLog = async (userId: string, amount: number) => {
-    if (!amount || amount <= 0) {
-        throw new Error('INVALID_AMOUNT');
-    }
+export const addWaterLog = async (userId: string, amount: number, dateParam?: string) => {
+    if (!amount || amount <= 0) throw new Error('INVALID_AMOUNT');
 
-    const newLog = await prisma.waterLog.create({
-        data: {
-            userId,
-            amount: Number(amount)
-        }
+    // Если добавляем воду в прошлый день, ставим время на 12:00 этого дня
+    const logDate = dateParam ? new Date(dateParam) : new Date();
+    if (dateParam) logDate.setHours(12, 0, 0, 0);
+
+    return await prisma.waterLog.create({
+        data: { userId, amount: Number(amount), date: logDate }
     });
-
-    return newLog;
 };
 
-export const removeWaterLog = async (userId: string, amount: number) => {
-    if (!amount || amount <= 0) {
-        throw new Error('INVALID_AMOUNT');
-    }
+export const removeWaterLog = async (userId: string, amount: number, dateParam?: string) => {
+    if (!amount || amount <= 0) throw new Error('INVALID_AMOUNT');
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const currentTotal = await getTodayWaterIntake(userId, dateParam);
+    if (currentTotal < amount) throw new Error('NOT_ENOUGH_WATER_TO_REMOVE');
 
-    // Ищем самую последнюю добавленную запись с таким же объемом за сегодня
-    const logToDelete = await prisma.waterLog.findFirst({
-        where: {
-            userId,
-            amount: Number(amount),
-            date: {
-                gte: today
-            }
-        },
-        orderBy: {
-            date: 'desc' // Сортируем от новых к старым, чтобы удалить последнюю
-        }
+    const logDate = dateParam ? new Date(dateParam) : new Date();
+    if (dateParam) logDate.setHours(12, 0, 0, 0);
+
+    return await prisma.waterLog.create({
+        data: { userId, amount: -Number(amount), date: logDate }
     });
-
-    // Если такой записи нет, ничего не делаем (бросаем ошибку)
-    if (!logToDelete) {
-        throw new Error('LOG_NOT_FOUND');
-    }
-
-    // Удаляем найденную запись
-    await prisma.waterLog.delete({
-        where: { id: logToDelete.id }
-    });
-
-    return true;
 };
