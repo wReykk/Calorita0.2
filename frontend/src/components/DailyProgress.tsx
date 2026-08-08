@@ -41,7 +41,7 @@ function MacroRow({ label, consumed, target, unit, isOver }: MacroRowProps) {
 
             <div className="h-2.5 overflow-hidden rounded-full bg-slate-200">
                 <div
-                    className={`h-full rounded-full bg-gradient-to-r transition-all duration-300 ${barColor}`}
+                    className={`h-full rounded-full bg-linear-to-r transition-all duration-300 ${barColor}`}
                     style={{ width: `${Math.max(2, percent)}%` }}
                 />
             </div>
@@ -73,7 +73,7 @@ function DailyProgress({ targetMacros, consumedMacros }: DailyProgressProps) {
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-slate-900 text-center text-sm font-semibold text-white shadow-inner">
+                        <div className="flex h-24 w-32 items-center justify-center rounded-full bg-slate-900 text-center text-sm font-semibold text-white shadow-inner">
                             <div>
                                 <div className="text-2xl">{caloriesPercent}%</div>
                                 <div className="text-[11px] uppercase tracking-[0.2em] text-slate-300">done</div>
@@ -93,7 +93,7 @@ function DailyProgress({ targetMacros, consumedMacros }: DailyProgressProps) {
 
                     <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200 lg:w-100 mr-5">
                         <div
-                            className={`h-full rounded-full bg-gradient-to-r transition-all duration-300 ${caloriesOver ? 'from-amber-500 to-orange-500' : 'from-emerald-500 to-teal-500'}`}
+                            className={`h-full rounded-full bg-linear-to-r transition-all duration-300 ${caloriesOver ? 'from-amber-500 to-orange-500' : 'from-emerald-500 to-teal-500'}`}
                             style={{ width: `${Math.max(4, caloriesPercent)}%` }}
                         />
                     </div>
