@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { usePageTitle } from '../hooks/usePageTitle.js'
-import apiClient from '../assets/api/client' // Проверь правильность пути к apiClient
-import WeightChart from '../components/WeightChart.js' // Проверь правильность пути к компоненту графика
+import apiClient from '../assets/api/client'
+import WeightChart from '../components/WeightChart.js'
+import ActivityStreak from '../components/ActivityStreak';
 
-// Тип для данных пользователя, которые нам нужны для графика
 interface UserChartData {
     targetWeight?: number | null;
+    currentStreak?: number;
+    longestStreak?: number;
     weightLogs: {
         id: string;
         weight: number;
@@ -21,11 +23,9 @@ function Home() {
     const isLoggedIn = Boolean(localStorage.getItem('token'))
     usePageTitle(t('home.pageTitle', 'Home'))
 
-    // Добавляем стейт для хранения данных пользователя
     const [userData, setUserData] = useState<UserChartData | null>(null)
     const [isLoadingData, setIsLoadingData] = useState(false)
 
-    // Загружаем данные пользователя, если он залогинен
     useEffect(() => {
         if (!isLoggedIn) return;
 
@@ -88,7 +88,7 @@ function Home() {
                     </p>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 md:grid-cols-2 mb-8">
                     <button
                         type="button"
                         onClick={() => navigate('/diary')}
@@ -114,18 +114,31 @@ function Home() {
                     </button>
                 </div>
 
-                {/* --- Блок с графиком веса --- */}
-                <div className="mt-8">
-                    {isLoadingData ? (
-                        <div className="flex h-72 w-full items-center justify-center rounded-3xl border border-gray-200 bg-white shadow-sm">
-                            <p className="text-sm text-gray-500">{t('common.loading', 'Loading...')}</p>
-                        </div>
-                    ) : (
-                        <WeightChart
-                            logs={userData?.weightLogs || []}
-                            targetWeight={userData?.targetWeight}
+                {/* --- Блок с аналитикой (График + Стрик) --- */}
+                <div className="mt-8 grid gap-6 lg:grid-cols-3 lg:items-start">
+
+                    {/* График занимает 2 колонки */}
+                    <div className="min-w-0 lg:col-span-2">
+                        {isLoadingData ? (
+                            <div className="flex h-72 w-full items-center justify-center rounded-3xl border border-gray-200 bg-white shadow-sm">
+                                <p className="text-sm text-gray-500">{t('common.loading', 'Loading...')}</p>
+                            </div>
+                        ) : (
+                            <WeightChart
+                                logs={userData?.weightLogs || []}
+                                targetWeight={userData?.targetWeight}
+                            />
+                        )}
+                    </div>
+
+                    {/* Стрик занимает 1 колонку */}
+                    <div className="min-w-0 lg:col-span-1">
+                        <ActivityStreak
+                            currentStreak={userData?.currentStreak}
+                            longestStreak={userData?.longestStreak}
                         />
-                    )}
+                    </div>
+
                 </div>
 
             </div>

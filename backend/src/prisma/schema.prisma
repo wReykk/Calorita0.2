@@ -100,6 +100,10 @@ model User {
   dailyFat      Float?
   dailyCarbs    Float?
 
+  currentStreak  Int       @default(0)
+  longestStreak  Int       @default(0)
+  lastActiveDate DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

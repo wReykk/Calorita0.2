@@ -30,6 +30,9 @@ export const getUserById = async (id: string) => {
             dailyCarbs: true,
             createdAt: true,
             updatedAt: true,
+            currentStreak: true,
+            longestStreak: true,
+            lastActiveDate: true,
             weightLogs: {
                 orderBy: {
                     date: 'asc'

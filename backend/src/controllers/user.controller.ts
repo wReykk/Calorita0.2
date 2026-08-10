@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import type { AuthRequest } from '../middlewares/auth.middleware.js';
 import * as userService from '../services/user.service.js';
+import { checkAndUpdateStreak } from '../services/streak.service.js';
 
 export const getCurrentUser = async (req: AuthRequest, res: Response) => {
     try {
@@ -9,6 +10,8 @@ export const getCurrentUser = async (req: AuthRequest, res: Response) => {
         if (!userId) {
             return res.status(401).json({ error: 'Access denied. No token' });
         }
+
+        await checkAndUpdateStreak(userId);
 
         const user = await userService.getUserById(userId);
 
