@@ -5,7 +5,8 @@ import { usePageTitle } from '../hooks/usePageTitle.js'
 import apiClient from '../assets/api/client'
 import WeightChart from '../components/WeightChart.js'
 import ActivityStreak from '../components/ActivityStreak'
-import NutritionalStats, { type NutritionalStatsData } from '../components/NutritionalStats'
+import NutritionalStats from '../components/NutritionalStats'
+import WaterStats from '../components/WaterStats'
 
 interface UserChartData {
     targetWeight?: number | null;
@@ -18,6 +19,11 @@ interface UserChartData {
     }[];
 }
 
+interface DashboardStats {
+    weekly: { calories: number; protein: number; fat: number; carbs: number; water: number; };
+    monthly: { calories: number; protein: number; fat: number; carbs: number; water: number; };
+}
+
 function Home() {
     const navigate = useNavigate()
     const { t } = useTranslation()
@@ -25,7 +31,7 @@ function Home() {
     usePageTitle(t('home.pageTitle', 'Home'))
 
     const [userData, setUserData] = useState<UserChartData | null>(null)
-    const [statsData, setStatsData] = useState<NutritionalStatsData | null>(null)
+    const [statsData, setStatsData] = useState<DashboardStats | null>(null)
     const [isLoadingData, setIsLoadingData] = useState(false)
 
     useEffect(() => {
@@ -77,17 +83,22 @@ function Home() {
     return (
         <div className="min-h-[80vh] bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-5xl">
-                <div className="mb-8 text-center">
-                    <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gray-500">{t('home.welcomeBackSubtitle')}</p>
-                    <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+                {/* --- Максимально сжатые отступы шапки --- */}
+                <div className="mb-5 text-center">
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-500">
+                        {t('home.welcomeBackSubtitle')}
+                    </p>
+                    <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
                         {t('home.welcomeBackTitle')}
                     </h1>
-                    <p className="mx-auto mt-3 max-w-4xl text-base leading-7 text-gray-600 text-center">
+                    <p className="mx-auto mt-1 max-w-4xl text-sm leading-6 text-gray-600 text-center">
                         {t('home.welcomeBackDescription')}
                     </p>
                 </div>
 
-                <div className="mt-8 grid gap-6 md:grid-cols-2 lg:items-start">
+                {/* --- Убрали lg:items-start, чтобы колонки тянулись одинаково --- */}
+                <div className="mt-6 grid gap-6 md:grid-cols-2">
+                    {/* ЛЕВАЯ КОЛОНКА */}
                     <div className="flex min-w-0 flex-col gap-6">
                         <ActivityStreak
                             currentStreak={userData?.currentStreak}
@@ -119,8 +130,19 @@ function Home() {
                         </button>
                     </div>
 
-                    <div className="min-w-0">
+                    {/* ПРАВАЯ КОЛОНКА */}
+                    <div className="flex min-w-0 flex-col gap-6">
                         <NutritionalStats stats={statsData} />
+
+                        {/* Обернули WaterStats в flex-1, чтобы он заполнял всю оставшуюся высоту */}
+                        {statsData && (
+                            <div className="flex-1">
+                                <WaterStats
+                                    weeklyAverage={statsData.weekly.water}
+                                    monthlyAverage={statsData.monthly.water}
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
 

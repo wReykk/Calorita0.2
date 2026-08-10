@@ -42,9 +42,25 @@ export const getNutritionalStats = async (userId: string) => {
         }
     });
 
-    // 4. Аккумуляторы для сумм
-    const weeklySum = { calories: 0, protein: 0, fat: 0, carbs: 0 };
-    const monthlySum = { calories: 0, protein: 0, fat: 0, carbs: 0 };
+    const waterLogs = await prisma.waterLog.findMany({
+        where: {
+            userId,
+            date: { gte: thirtyDaysAgo }
+        },
+        select: { date: true, amount: true }
+    });
+
+    const weeklySum = { calories: 0, protein: 0, fat: 0, carbs: 0, water: 0 }; // добавили water
+    const monthlySum = { calories: 0, protein: 0, fat: 0, carbs: 0, water: 0 }; // добавили water
+
+    waterLogs.forEach(log => {
+        const logDate = new Date(log.date);
+        monthlySum.water += log.amount;
+
+        if (logDate >= sevenDaysAgo) {
+            weeklySum.water += log.amount;
+        }
+    });
 
     entries.forEach(entry => {
         const entryDate = new Date(entry.date);
@@ -71,12 +87,14 @@ export const getNutritionalStats = async (userId: string) => {
             protein: Math.round(weeklySum.protein / weeklyDivisor),
             fat: Math.round(weeklySum.fat / weeklyDivisor),
             carbs: Math.round(weeklySum.carbs / weeklyDivisor),
+            water: Math.round(weeklySum.water / weeklyDivisor), // добавили
         },
         monthly: {
             calories: Math.round(monthlySum.calories / monthlyDivisor),
             protein: Math.round(monthlySum.protein / monthlyDivisor),
             fat: Math.round(monthlySum.fat / monthlyDivisor),
             carbs: Math.round(monthlySum.carbs / monthlyDivisor),
+            water: Math.round(monthlySum.water / monthlyDivisor), // добавили
         }
     };
 };

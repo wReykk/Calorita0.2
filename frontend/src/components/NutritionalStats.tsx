@@ -18,7 +18,7 @@ export default function NutritionalStats({ stats }: NutritionalStatsProps) {
     // Если данные еще не загрузились, показываем заглушку
     if (!stats) {
         return (
-            <div className="flex h-full min-h-[300px] w-full items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex h-full min-h-75 w-full items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <p className="text-sm text-slate-500">{t('common.loading', 'Loading...')}</p>
             </div>
         );
