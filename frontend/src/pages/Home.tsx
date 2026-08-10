@@ -7,6 +7,7 @@ import WeightChart from '../components/WeightChart.js'
 import ActivityStreak from '../components/ActivityStreak'
 import NutritionalStats from '../components/NutritionalStats'
 import WaterStats from '../components/WaterStats'
+import WeightReminder from '../components/WeightReminder'
 
 interface UserChartData {
     targetWeight?: number | null;
@@ -83,15 +84,19 @@ function Home() {
     return (
         <div className="min-h-[80vh] bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-5xl">
+
+                {userData && (
+                    <WeightReminder weightLogs={userData.weightLogs || []} />
+                )}
                 {/* --- Максимально сжатые отступы шапки --- */}
-                <div className="mb-5 text-center">
-                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-500">
+                <div className="mb-2 text-center">
+                    {/* <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-500">
                         {t('home.welcomeBackSubtitle')}
-                    </p>
-                    <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+                    </p> */}
+                    <h1 className="text-1xl font-semibold tracking-tight text-gray-900 sm:text-1xl">
                         {t('home.welcomeBackTitle')}
                     </h1>
-                    <p className="mx-auto mt-1 max-w-4xl text-sm leading-6 text-gray-600 text-center">
+                    <p className="mx-auto max-w-4xl text-sm leading-6 text-gray-600 text-center">
                         {t('home.welcomeBackDescription')}
                     </p>
                 </div>

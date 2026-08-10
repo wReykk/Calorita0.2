@@ -20,10 +20,10 @@ app.use('/api/products', productRoutes);
 app.use('/api/diary', diaryRouter);
 app.use('/api/recipes', recipeRoutes);
 app.use('/api/water', waterRoutes)
+app.use('/api/users', userRoutes)
 
 // app.get('/ping', (req, res) => res.send('pong'))
 
-app.use('/api/users', userRoutes)
 
 app.use(errorHandler)
 

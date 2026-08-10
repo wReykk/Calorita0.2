@@ -9,7 +9,7 @@ export default function WaterStats({ weeklyAverage = 0 }: WaterStatsProps) {
     const { t } = useTranslation();
 
     return (
-        <div className="flex h-full w-full flex-col justify-between rounded-3xl border border-blue-100 bg-gradient-to-b from-blue-50 to-white p-6 shadow-sm">
+        <div className="flex h-full w-full flex-col justify-between rounded-3xl border border-blue-100 bg-linear-to-b from-blue-50 to-white p-6 shadow-sm">
             <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-3xl text-blue-500 shadow-inner">
                     💧
