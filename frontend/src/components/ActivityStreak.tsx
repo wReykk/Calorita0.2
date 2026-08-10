@@ -9,7 +9,7 @@ export default function ActivityStreak({ currentStreak = 0, longestStreak = 0 }:
     const { t } = useTranslation();
 
     return (
-        <div className="flex h-full flex-col justify-between rounded-3xl border border-orange-200 bg-gradient-to-b from-orange-50 to-white p-6 shadow-sm">
+        <div className="flex h-full flex-col justify-between rounded-3xl border border-orange-200 bg-linear-to-b from-orange-50 to-white p-6 shadow-sm">
             <div className="mb-4">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600">
                     {t('streak.subtitle', 'Keep it up!')}

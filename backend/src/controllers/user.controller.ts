@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import type { AuthRequest } from '../middlewares/auth.middleware.js';
 import * as userService from '../services/user.service.js';
 import { checkAndUpdateStreak } from '../services/streak.service.js';
+import { getNutritionalStats } from '../services/stats.service.js';
 
 export const getCurrentUser = async (req: AuthRequest, res: Response) => {
     try {
@@ -13,11 +14,15 @@ export const getCurrentUser = async (req: AuthRequest, res: Response) => {
 
         await checkAndUpdateStreak(userId);
 
-        const user = await userService.getUserById(userId);
+        const [user, stats] = await Promise.all([
+            userService.getUserById(userId),
+            getNutritionalStats(userId)
+        ]);
 
         res.status(200).json({
             success: true,
             user,
+            stats
         });
     } catch (error: any) {
         console.error('Error in userController:', error);
