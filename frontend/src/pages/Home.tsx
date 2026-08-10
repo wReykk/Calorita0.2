@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { usePageTitle } from '../hooks/usePageTitle.js'
 import apiClient from '../assets/api/client'
 import WeightChart from '../components/WeightChart.js'
-import ActivityStreak from '../components/ActivityStreak';
+import ActivityStreak from '../components/ActivityStreak'
+import NutritionalStats, { type NutritionalStatsData } from '../components/NutritionalStats'
 
 interface UserChartData {
     targetWeight?: number | null;
@@ -24,6 +25,7 @@ function Home() {
     usePageTitle(t('home.pageTitle', 'Home'))
 
     const [userData, setUserData] = useState<UserChartData | null>(null)
+    const [statsData, setStatsData] = useState<NutritionalStatsData | null>(null)
     const [isLoadingData, setIsLoadingData] = useState(false)
 
     useEffect(() => {
@@ -32,12 +34,9 @@ function Home() {
         const fetchUserData = async () => {
             setIsLoadingData(true)
             try {
-                // Обрати внимание, я поменял '/users/me' на '/me', так как на скриншоте у тебя запрос идет на /me
                 const response = await apiClient.get('/users/me')
-
-                // ИСПРАВЛЕНИЕ ЗДЕСЬ: добавляем .user
                 setUserData(response.data.user)
-
+                setStatsData(response.data.stats)
             } catch (error) {
                 console.error('Failed to fetch user data for chart:', error)
             } finally {
@@ -88,59 +87,55 @@ function Home() {
                     </p>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2 mb-8">
-                    <button
-                        type="button"
-                        onClick={() => navigate('/diary')}
-                        className="rounded-3xl border border-gray-200 bg-white p-8 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                    >
-                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">{t('home.diaryLabel')}</p>
-                        <h2 className="mt-3 text-2xl font-semibold text-gray-900">{t('home.diaryCardTitle')}</h2>
-                        <p className="mt-3 text-sm leading-6 text-gray-600">
-                            {t('home.diaryCardDescription')}
-                        </p>
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => navigate('/products')}
-                        className="rounded-3xl border border-gray-200 bg-white p-8 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                    >
-                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">{t('home.productsLabel')}</p>
-                        <h2 className="mt-3 text-2xl font-semibold text-gray-900">{t('home.productsCardTitle')}</h2>
-                        <p className="mt-3 text-sm leading-6 text-gray-600">
-                            {t('home.productsCardDescription')}
-                        </p>
-                    </button>
-                </div>
-
-                {/* --- Блок с аналитикой (График + Стрик) --- */}
-                <div className="mt-8 grid gap-6 lg:grid-cols-3 lg:items-start">
-
-                    {/* График занимает 2 колонки */}
-                    <div className="min-w-0 lg:col-span-2">
-                        {isLoadingData ? (
-                            <div className="flex h-72 w-full items-center justify-center rounded-3xl border border-gray-200 bg-white shadow-sm">
-                                <p className="text-sm text-gray-500">{t('common.loading', 'Loading...')}</p>
-                            </div>
-                        ) : (
-                            <WeightChart
-                                logs={userData?.weightLogs || []}
-                                targetWeight={userData?.targetWeight}
-                            />
-                        )}
-                    </div>
-
-                    {/* Стрик занимает 1 колонку */}
-                    <div className="min-w-0 lg:col-span-1">
+                <div className="mt-8 grid gap-6 md:grid-cols-2 lg:items-start">
+                    <div className="flex min-w-0 flex-col gap-6">
                         <ActivityStreak
                             currentStreak={userData?.currentStreak}
                             longestStreak={userData?.longestStreak}
                         />
+
+                        <button
+                            type="button"
+                            onClick={() => navigate('/diary')}
+                            className="rounded-3xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                        >
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">{t('home.diaryLabel')}</p>
+                            <h2 className="mt-2 text-xl font-semibold text-gray-900">{t('home.diaryCardTitle')}</h2>
+                            <p className="mt-2 text-sm leading-6 text-gray-600">
+                                {t('home.diaryCardDescription')}
+                            </p>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => navigate('/products')}
+                            className="rounded-3xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                        >
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">{t('home.productsLabel')}</p>
+                            <h2 className="mt-2 text-xl font-semibold text-gray-900">{t('home.productsCardTitle')}</h2>
+                            <p className="mt-2 text-sm leading-6 text-gray-600">
+                                {t('home.productsCardDescription')}
+                            </p>
+                        </button>
                     </div>
 
+                    <div className="min-w-0">
+                        <NutritionalStats stats={statsData} />
+                    </div>
                 </div>
 
+                <div className="mt-8">
+                    {isLoadingData ? (
+                        <div className="flex h-72 w-full items-center justify-center rounded-3xl border border-gray-200 bg-white shadow-sm">
+                            <p className="text-sm text-gray-500">{t('common.loading', 'Loading...')}</p>
+                        </div>
+                    ) : (
+                        <WeightChart
+                            logs={userData?.weightLogs || []}
+                            targetWeight={userData?.targetWeight}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     )
