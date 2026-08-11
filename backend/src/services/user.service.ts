@@ -59,8 +59,24 @@ export const getUserById = async (id: string) => {
 export const updateUserParameters = async (id: string, data: any) => {
     const { weight, height, dateOfBirth, sex, activityLevel, goal, pace, targetWeight } = data;
 
+
     if (!weight || !height || !dateOfBirth || !sex || !activityLevel || !goal || !pace) {
         throw new Error('MISSING_DATA');
+    }
+
+    if (weight && targetWeight && goal) {
+
+        if (goal === 'GAIN' && targetWeight <= weight) {
+            throw new Error('INVALID_WEIGHT_GAIN');
+        }
+
+        if (goal === 'LOSE' && targetWeight >= weight) {
+            throw new Error('INVALID_WEIGHT_LOSE');
+        }
+
+        if (goal === 'MAINTAIN' && targetWeight !== weight) {
+            data.targetWeight = data.weight;
+        }
     }
 
     const age = calculateAge(dateOfBirth);

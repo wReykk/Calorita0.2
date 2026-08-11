@@ -54,6 +54,12 @@ export const updateParameters = async (req: Request<{ id: string }>, res: Respon
         if (error.message === 'MISSING_DATA') {
             return res.status(400).json({ error: 'Fill everything.' });
         }
+        if (error.message === 'INVALID_WEIGHT_GAIN') {
+            return res.status(400).json({ error: 'Target weight must be higher than current weight for GAIN goal.' });
+        }
+        if (error.message === 'INVALID_WEIGHT_LOSE') {
+            return res.status(400).json({ error: 'Target weight must be lower than current weight for LOSE goal.' });
+        }
 
         res.status(500).json({ error: 'Server error.' });
     }
