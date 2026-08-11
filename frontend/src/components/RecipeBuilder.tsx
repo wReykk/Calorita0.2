@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
 import { recipeService, type RecipeDetails } from '../services/recipe.service'
 
+
 type ProductOption = {
     id: string
     name: string
@@ -30,7 +31,7 @@ type RecipeBuilderProps = {
 }
 
 function RecipeBuilder({ open, onClose, onSaveSuccess, initialData }: RecipeBuilderProps) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const [name, setName] = useState(() => initialData?.name ?? '')
     const [totalWeight, setTotalWeight] = useState(() => (initialData?.totalWeight != null ? String(initialData.totalWeight) : ''))
     const [searchQuery, setSearchQuery] = useState('')
@@ -71,7 +72,7 @@ function RecipeBuilder({ open, onClose, onSaveSuccess, initialData }: RecipeBuil
                 try {
                     const token = localStorage.getItem('token')
                     const response = await apiClient.get('/products/search', {
-                        params: { q: searchQuery.trim() },
+                        params: { q: searchQuery.trim(), lang: i18n.language },
                         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
                     })
 
@@ -93,7 +94,7 @@ function RecipeBuilder({ open, onClose, onSaveSuccess, initialData }: RecipeBuil
         }, 400)
 
         return () => window.clearTimeout(timeoutId)
-    }, [open, searchQuery])
+    }, [open, searchQuery, i18n.language])
 
     const handleSelectProduct = (product: ProductOption) => {
         if (!product.id) return

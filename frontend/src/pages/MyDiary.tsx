@@ -115,7 +115,7 @@ function MyDiary() {
             try {
                 const token = localStorage.getItem('token')
                 const response = await apiClient.get('/products/search', {
-                    params: { q: searchQuery.trim() },
+                    params: { q: searchQuery.trim(), lang: i18n.language },
                     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
                 })
 
@@ -132,7 +132,7 @@ function MyDiary() {
         }, 500)
 
         return () => window.clearTimeout(timeoutId)
-    }, [searchQuery])
+    }, [searchQuery, i18n.language])
 
     useEffect(() => {
         const fetchEntries = async () => {
