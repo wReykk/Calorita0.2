@@ -12,10 +12,10 @@ export default function ActivityStreak({ currentStreak = 0, longestStreak = 0 }:
         <div className="flex h-full flex-col justify-between rounded-3xl border border-orange-200 bg-linear-to-b from-orange-50 to-white p-6 shadow-sm">
             <div className="mb-4">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600">
-                    {t('streak.subtitle', 'Keep it up!')}
+                    {t('ActivityStreak.subtitle', 'Keep it up!')}
                 </p>
                 <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
-                    {t('streak.title', 'Activity Streak')}
+                    {t('ActivityStreak.title', 'Activity Streak')}
                 </h2>
             </div>
 
@@ -27,11 +27,11 @@ export default function ActivityStreak({ currentStreak = 0, longestStreak = 0 }:
                     <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-bold text-orange-500">{currentStreak}</span>
                         <span className="text-sm font-medium text-slate-500">
-                            {t('streak.days', 'days')}
+                            {t('ActivityStreak.days', 'days')}
                         </span>
                     </div>
                     <p className="text-sm text-slate-500">
-                        {t('streak.best', 'Best:')} <span className="font-semibold text-slate-700">{longestStreak}</span>
+                        {t('ActivityStreak.best', 'Best:')} <span className="font-semibold text-slate-700">{longestStreak}</span>
                     </p>
                 </div>
             </div>

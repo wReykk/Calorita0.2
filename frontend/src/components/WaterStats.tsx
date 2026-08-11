@@ -19,7 +19,7 @@ export default function WaterStats({ weeklyAverage = 0 }: WaterStatsProps) {
                         {t('stats.waterAvg', 'Avg Intake')}
                     </p>
                     <h3 className="text-xl font-semibold text-slate-900">
-                        {weeklyAverage} <span className="text-sm font-medium text-slate-500">ml / day</span>
+                        {weeklyAverage} <span className="text-sm font-medium text-slate-500">{t('waterStats.mlPerDay', 'ml / day')}</span>
                     </h3>
                 </div>
             </div>

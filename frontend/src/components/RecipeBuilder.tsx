@@ -39,7 +39,7 @@ function RecipeBuilder({ open, onClose, onSaveSuccess, initialData }: RecipeBuil
     const [ingredients, setIngredients] = useState<Ingredient[]>(() => initialData?.recipeIngredients.map((item) => ({
         id: item.ingredientId,
         productId: item.ingredientId,
-        name: item.ingredient?.name || 'Unknown product',
+        name: item.ingredient?.name || t('recipeBuilder.unknownProduct', 'Unknown product'),
         calories: item.ingredient?.calories,
         protein: item.ingredient?.protein,
         fat: item.ingredient?.fat,
@@ -193,7 +193,7 @@ function RecipeBuilder({ open, onClose, onSaveSuccess, initialData }: RecipeBuil
     const handleDelete = async () => {
         if (!initialData?.id) return;
 
-        if (window.confirm('Are you sure you want to delete this recipe?')) {
+        if (window.confirm(t('recipeBuilder.confirmDelete', 'Are you sure you want to delete this recipe?'))) {
             try {
                 await recipeService.deleteRecipe(initialData.id);
 

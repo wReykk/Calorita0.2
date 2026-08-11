@@ -1,4 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
 
 type FormState = {
@@ -102,7 +103,8 @@ const getInitialFormState = (): FormState => {
     return buildFormStateFromUser(storedUser)
 }
 
-function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel = 'Save settings' }: UserSettingsFormProps) {
+function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel }: UserSettingsFormProps) {
+    const { t } = useTranslation()
     const [form, setForm] = useState<FormState>(() => getInitialFormState())
     const [isSaving, setIsSaving] = useState(false)
     const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -179,11 +181,11 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
         const roundedMaxWeight = Math.round(maxWeight)
 
         if (targetWeightValue < minWeight) {
-            return `Minimum safe weight for your height is ${roundedMinWeight} kg.`
+            return t('userSettings.errorMinWeight', 'Minimum safe weight for your height is {{min}} kg.', { min: roundedMinWeight })
         }
 
         if (targetWeightValue > maxWeight) {
-            return `Maximum allowed weight for your height is ${roundedMaxWeight} kg.`
+            return t('userSettings.errorMaxWeight', 'Maximum allowed weight for your height is {{max}} kg.', { max: roundedMaxWeight })
         }
 
         return null
@@ -257,10 +259,10 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                 type: 'success',
                 message:
                     estimatedWeeksToGoal !== null && estimatedWeeksToGoal !== undefined
-                        ? `Settings saved! Estimated time to reach your goal: ${estimatedWeeksToGoal} weeks.`
+                        ? t('userSettings.successWithEstimate', 'Settings saved! Estimated time to reach your goal: {{weeks}} weeks.', { weeks: estimatedWeeksToGoal })
                         : isOnboarding
-                            ? 'Settings saved successfully! Redirecting...'
-                            : 'Settings saved successfully!',
+                            ? t('userSettings.successOnboarding', 'Settings saved successfully! Redirecting...')
+                            : t('userSettings.successSave', 'Settings saved successfully!'),
             })
 
             if (isOnboarding) {
@@ -269,26 +271,29 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                 }, 1200)
             }
         } catch {
-            setFeedback({ type: 'error', message: 'Unable to save your settings right now.' })
+            setFeedback({ type: 'error', message: t('userSettings.errorSave', 'Unable to save your settings right now.') })
         } finally {
             setIsSaving(false)
         }
     }
+
+    const defaultSubmitLabel = submitLabel || t('userSettings.saveSettings', 'Save settings')
+    const lastUpdatedText = lastUpdated ? t('userSettings.lastUpdated', 'Last updated: {{date}}', { date: lastUpdated }) : null
 
     return (
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
             <div className="mb-6">
                 {/* <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Settings</p> */}
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-                    {isOnboarding ? 'Complete your profile' : 'Update your body metrics'}
+                    {isOnboarding ? t('userSettings.completeProfile', 'Complete your profile') : t('userSettings.updateMetrics', 'Update your body metrics')}
                 </h2>
                 <p className="my-5 text-sm leading-6 text-slate-600">
                     {isOnboarding
-                        ? 'Fill in your measurements and goals so Calorita can personalize your plan.'
-                        : 'Add your current measurements and goals so Calorita can tailor your daily nutrition plan.'}
+                        ? t('userSettings.onboardingDescription', 'Fill in your measurements and goals so Calorita can personalize your plan.')
+                        : t('userSettings.profileDescription', 'Add your current measurements and goals so Calorita can tailor your daily nutrition plan.')}
                 </p>
-                {lastUpdated ? (
-                    <p className="mt-5 text-sm text-gray-500">Last updated: {lastUpdated}</p>
+                {lastUpdatedText ? (
+                    <p className="mt-5 text-sm text-gray-500">{lastUpdatedText}</p>
                 ) : null}
             </div>
 
@@ -296,7 +301,7 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                 <div className="grid gap-4 md:grid-cols-2">
                     <div>
                         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="height">
-                            Height (cm)
+                            {t('userSettings.height', 'Height (cm)')}
                         </label>
                         <input
                             id="height"
@@ -311,7 +316,7 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
 
                     <div>
                         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="weight">
-                            Weight (kg)
+                            {t('userSettings.weight', 'Weight (kg)')}
                         </label>
                         <input
                             id="weight"
@@ -329,7 +334,7 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                 <div className="grid gap-4 md:grid-cols-2">
                     <div>
                         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="dateOfBirth">
-                            Date of Birth
+                            {t('userSettings.dateOfBirth', 'Date of Birth')}
                         </label>
                         <input
                             id="dateOfBirth"
@@ -343,7 +348,7 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
 
                     <div>
                         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="sex">
-                            Sex
+                            {t('userSettings.sex', 'Sex')}
                         </label>
                         <select
                             id="sex"
@@ -352,8 +357,8 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
                             required
                         >
-                            <option value="MALE">MALE</option>
-                            <option value="FEMALE">FEMALE</option>
+                            <option value="MALE">{t('userSettings.sexMale', 'MALE')}</option>
+                            <option value="FEMALE">{t('userSettings.sexFemale', 'FEMALE')}</option>
                         </select>
                     </div>
                 </div>
@@ -361,7 +366,7 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                 <div className="grid gap-4 md:grid-cols-2">
                     <div>
                         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="activityLevel">
-                            Activity Level
+                            {t('userSettings.activityLevel', 'Activity Level')}
                         </label>
                         <select
                             id="activityLevel"
@@ -370,17 +375,17 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
                             required
                         >
-                            <option value="SEDENTARY">SEDENTARY</option>
-                            <option value="LIGHT">LIGHT</option>
-                            <option value="MODERATE">MODERATE</option>
-                            <option value="ACTIVE">ACTIVE</option>
-                            <option value="VERY_ACTIVE">VERY ACTIVE</option>
+                            <option value="SEDENTARY">{t('userSettings.activitySedentary', 'SEDENTARY')}</option>
+                            <option value="LIGHT">{t('userSettings.activityLight', 'LIGHT')}</option>
+                            <option value="MODERATE">{t('userSettings.activityModerate', 'MODERATE')}</option>
+                            <option value="ACTIVE">{t('userSettings.activityActive', 'ACTIVE')}</option>
+                            <option value="VERY_ACTIVE">{t('userSettings.activityVeryActive', 'VERY ACTIVE')}</option>
                         </select>
                     </div>
 
                     <div>
                         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="goal">
-                            Goal
+                            {t('userSettings.goal', 'Goal')}
                         </label>
                         <select
                             id="goal"
@@ -389,9 +394,9 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
                             required
                         >
-                            <option value="LOSE">LOSE</option>
-                            <option value="MAINTAIN">MAINTAIN</option>
-                            <option value="GAIN">GAIN</option>
+                            <option value="LOSE">{t('userSettings.goalLose', 'LOSE')}</option>
+                            <option value="MAINTAIN">{t('userSettings.goalMaintain', 'MAINTAIN')}</option>
+                            <option value="GAIN">{t('userSettings.goalGain', 'GAIN')}</option>
                         </select>
                     </div>
                 </div>
@@ -400,7 +405,7 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                     <div className="grid gap-4 md:grid-cols-2">
                         <div>
                             <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="targetWeight">
-                                Target Weight (kg)
+                                {t('userSettings.targetWeight', 'Target Weight (kg)')}
                             </label>
                             <input
                                 id="targetWeight"
@@ -418,7 +423,7 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
 
                         <div>
                             <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="pace">
-                                Pace
+                                {t('userSettings.pace', 'Pace')}
                             </label>
                             <select
                                 id="pace"
@@ -427,9 +432,9 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                                 className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
                                 required={!isMaintainGoal}
                             >
-                                <option value="EASY">EASY</option>
-                                <option value="MEDIUM">MEDIUM</option>
-                                <option value="HARD">HARD</option>
+                                <option value="EASY">{t('userSettings.paceEasy', 'EASY')}</option>
+                                <option value="MEDIUM">{t('userSettings.paceMedium', 'MEDIUM')}</option>
+                                <option value="HARD">{t('userSettings.paceHard', 'HARD')}</option>
                             </select>
                         </div>
                     </div>
@@ -446,7 +451,7 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel =
                     disabled={isSubmitDisabled}
                     className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                    {isSaving ? 'Saving...' : submitLabel}
+                    {isSaving ? t('userSettings.saving', 'Saving...') : defaultSubmitLabel}
                 </button>
             </form>
         </div>

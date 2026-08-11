@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 type TargetMacros = {
     dailyCalories: number
     dailyProtein: number
@@ -26,6 +28,7 @@ type MacroRowProps = {
 }
 
 function MacroRow({ label, consumed, target, unit, isOver }: MacroRowProps) {
+    const { t } = useTranslation()
     const safeTarget = target > 0 ? target : 1
     const percent = Math.min(100, Math.round((consumed / safeTarget) * 100))
     const barColor = isOver ? 'from-amber-500 to-orange-500' : 'from-emerald-500 to-teal-500'
@@ -46,7 +49,7 @@ function MacroRow({ label, consumed, target, unit, isOver }: MacroRowProps) {
                 />
             </div>
 
-            <div className="text-xs text-slate-500">{percent}% of target</div>
+            <div className="text-xs text-slate-500">{t('dailyProgress.percentOfTarget', '{{percent}}% of target', { percent })}</div>
         </div>
     )
 }
@@ -58,15 +61,17 @@ function DailyProgress({ targetMacros, consumedMacros }: DailyProgressProps) {
     const caloriesOver = caloriesConsumed > caloriesTarget
     const caloriesRemaining = Math.max(caloriesTarget - caloriesConsumed, 0)
 
+    const { t } = useTranslation()
+
     return (
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
             <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">Your nutrition goals</h2>
-                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Check your daily progress</p>
+                    <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">{t('dailyProgress.title', 'Your nutrition goals')}</h2>
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">{t('dailyProgress.subtitle', 'Check your daily progress')}</p>
                 </div>
                 <div className={`rounded-full px-3 py-1 text-sm font-medium ${caloriesOver ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                    {caloriesOver ? 'Over target' : 'On track'}
+                    {caloriesOver ? t('dailyProgress.overTarget', 'Over target') : t('dailyProgress.onTrack', 'On track')}
                 </div>
             </div>
 
@@ -76,17 +81,19 @@ function DailyProgress({ targetMacros, consumedMacros }: DailyProgressProps) {
                         <div className="flex h-24 w-32 items-center justify-center rounded-full bg-slate-900 text-center text-sm font-semibold text-white shadow-inner">
                             <div>
                                 <div className="text-2xl">{caloriesPercent}%</div>
-                                <div className="text-[11px] uppercase tracking-[0.2em] text-slate-300">done</div>
+                                <div className="text-[11px] uppercase tracking-[0.2em] text-slate-300">{t('dailyProgress.done', 'done')}</div>
                             </div>
                         </div>
 
                         <div className="flex flex-col gap-1 ml-4">
-                            <p className="text-sm font-medium text-slate-600">Calories</p>
+                            <p className="text-sm font-medium text-slate-600">{t('dailyProgress.calories', 'Calories')}</p>
                             <p className="text-xl font-semibold text-slate-900">
-                                {(caloriesConsumed).toFixed(0)} / {caloriesTarget} kcal
+                                {(caloriesConsumed).toFixed(0)} / {caloriesTarget} {t('dailyProgress.kcal', 'kcal')}
                             </p>
                             <p className={`mt-1 text-sm font-medium ${caloriesOver ? 'text-amber-600' : 'text-slate-600'}`}>
-                                {caloriesOver ? `Over by ${Math.abs(caloriesTarget - caloriesConsumed)} kcal` : `${caloriesRemaining} kcal remaining`}
+                                {caloriesOver
+                                    ? t('dailyProgress.overBy', 'Over by {{amount}} kcal', { amount: Math.abs(caloriesTarget - caloriesConsumed) })
+                                    : t('dailyProgress.remaining', '{{remaining}} kcal remaining', { remaining: caloriesRemaining })}
                             </p>
                         </div>
                     </div>
@@ -102,24 +109,24 @@ function DailyProgress({ targetMacros, consumedMacros }: DailyProgressProps) {
 
             <div className="mt-6 grid gap-4 md:grid-cols-3">
                 <MacroRow
-                    label="Protein"
+                    label={t('dailyProgress.protein', 'Protein')}
                     consumed={Number(Number(consumedMacros.protein).toFixed(1))}
                     target={targetMacros.dailyProtein}
-                    unit="g"
+                    unit={t('dailyProgress.gram', 'g')}
                     isOver={consumedMacros.protein > targetMacros.dailyProtein}
                 />
                 <MacroRow
-                    label="Fat"
+                    label={t('dailyProgress.fat', 'Fat')}
                     consumed={Number(Number(consumedMacros.fat).toFixed(1))}
                     target={targetMacros.dailyFat}
-                    unit="g"
+                    unit={t('dailyProgress.gram', 'g')}
                     isOver={consumedMacros.fat > targetMacros.dailyFat}
                 />
                 <MacroRow
-                    label="Carbs"
+                    label={t('dailyProgress.carbs', 'Carbs')}
                     consumed={Number(Number(consumedMacros.carbs).toFixed(1))}
                     target={targetMacros.dailyCarbs}
-                    unit="g"
+                    unit={t('dailyProgress.gram', 'g')}
                     isOver={consumedMacros.carbs > targetMacros.dailyCarbs}
                 />
             </div>

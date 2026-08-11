@@ -99,6 +99,7 @@ function MyDiary() {
     const isUkrainian = i18n.language?.startsWith('uk') ?? false
     const unitG = isUkrainian ? 'г' : 'g'
     const unitKcal = isUkrainian ? 'ккал' : 'kcal'
+    const per100gText = t('myDiary.per100g', 'Per 100g')
     usePageTitle(t('myDiary.pageTitle', 'Diary'))
 
     useEffect(() => {
@@ -213,7 +214,7 @@ function MyDiary() {
         setSearchQuery(product.name)
 
         const is100g = !product.pieceName && (product.description?.includes('Per 100g') ?? true)
-        const servingText = is100g ? 'Per 100g' : (product.pieceName || product.description?.split(' - ')[0]?.trim() || '')
+        const servingText = is100g ? per100gText : (product.pieceName || product.description?.split(' - ')[0]?.trim() || '')
 
         setSelectedServingDescription(servingText)
         setWeight(is100g ? '' : '1')
@@ -222,7 +223,9 @@ function MyDiary() {
         setIsDropdownOpen(false)
     }
 
-    const portionInputLabel = selectedServingDescription === 'Per 100g' ? 'Weight (g)' : 'Quantity'
+    const portionInputLabel = selectedServingDescription === per100gText
+        ? t('myDiary.weight', 'Weight (g)')
+        : t('myDiary.quantity', 'Quantity')
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -337,7 +340,7 @@ function MyDiary() {
                                 onClick={handleBackToToday}
                                 className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
                             >
-                                Back to Today
+                                {t('myDiary.backToToday', 'Back to Today')}
                             </button>
                         ) : null}
                     </div>
@@ -393,8 +396,8 @@ function MyDiary() {
                                             const myProducts = searchResults.filter((product) => product.isGlobal === false)
                                             const globalProducts = searchResults.filter((product) => product.isGlobal === true)
                                             const sections = [
-                                                { title: 'My Products', items: myProducts },
-                                                { title: 'Global Database', items: globalProducts },
+                                                { title: t('myDiary.myProducts', 'My Products'), items: myProducts },
+                                                { title: t('myDiary.globalDatabase', 'Global Database'), items: globalProducts },
                                             ]
 
                                             return sections.flatMap((section, sectionIndex) => {

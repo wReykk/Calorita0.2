@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 function UserProfile() {
     const navigate = useNavigate()
     const { t } = useTranslation()
-    usePageTitle(t('home.pageTitle', 'Profile'))
+    usePageTitle(t('profile.pageTitle', 'Profile'))
 
     return (
         <div className="min-h-[80vh] bg-gray-50 px-4 pb-8 sm:px-6 lg:px-8">
@@ -17,12 +17,16 @@ function UserProfile() {
                         onClick={() => navigate(-1)}
                         className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                     >
-                        ← Back
+                        {t('profile.back', '← Back')}
                     </button>
 
                     <div className="text-right">
-                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Profile</p>
-                        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Your settings</h1>
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+                            {t('profile.sectionLabel', 'Profile')}
+                        </p>
+                        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+                            {t('profile.heading', 'Your settings')}
+                        </h1>
                     </div>
                 </div>
 
