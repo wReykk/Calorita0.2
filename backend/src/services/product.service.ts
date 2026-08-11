@@ -5,14 +5,12 @@ export class ProductService {
 
     public async getAllProducts(userId: string) {
         return await prisma.product.findMany({
-            // ИСПРАВЛЕНО: userId -> creatorId
             where: { creatorId: userId, isRecipe: false }
         });
     }
 
     public async getProductById(id: string, userId: string) {
         return await prisma.product.findFirst({
-            // ИСПРАВЛЕНО: userId -> creatorId
             where: { id, creatorId: userId }
         });
     }
@@ -21,14 +19,13 @@ export class ProductService {
         return await prisma.product.create({
             data: {
                 ...data,
-                creatorId: userId // ИСПРАВЛЕНО: userId -> creatorId
+                creatorId: userId
             }
         });
     }
 
     public async updateProduct(id: string, userId: string, data: { name?: string; calories?: number; protein?: number; fat?: number; carbs?: number; description?: string; pieceName?: string }) {
         return await prisma.product.update({
-            // ИСПРАВЛЕНО: userId -> creatorId
             where: { id, creatorId: userId },
             data: data
         });
@@ -36,7 +33,6 @@ export class ProductService {
 
     public async deleteProduct(id: string, userId: string) {
         await prisma.product.delete({
-            // ИСПРАВЛЕНО: userId -> creatorId
             where: { id, creatorId: userId }
         });
     }
@@ -44,13 +40,11 @@ export class ProductService {
     public async searchLocalProducts(userId: string, query: string) {
         const localProducts = await prisma.product.findMany({
             where: {
-                creatorId: userId, // ИСПРАВЛЕНО: userId -> creatorId
+                creatorId: userId,
                 name: {
                     contains: query,
                     mode: 'insensitive'
                 }
-                // Заметь: мы НЕ пишем здесь isRecipe: false, 
-                // поэтому поиск будет находить и обычные продукты, и твои рецепты!
             },
             take: 10
         });
@@ -69,11 +63,11 @@ export class ProductService {
         }));
     }
 
-    public async searchExternalProducts(query: string) {
+    public async searchExternalProducts(query: string, lang: string = 'uk') {
         try {
-            return await searchProductsInFatSecret(query);
+            return await searchProductsInFatSecret(query, lang);
         } catch (error) {
-            console.error('Ошибка при поиске в FatSecret:', error);
+            console.error('FatSecret error:', error);
             return [];
         }
     }

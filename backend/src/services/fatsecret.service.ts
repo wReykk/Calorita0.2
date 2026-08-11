@@ -1,11 +1,10 @@
 import axios from 'axios';
+import { translateText } from './translation.service.js';
 
 let accessToken = '';
 let tokenExpiration = 0;
 
 async function getAccessToken(): Promise<string> {
-    // Безопасное чтение: переменные читаются в момент вызова функции, 
-    // чтобы dotenv точно успел их подгрузить из файла .env
     const CLIENT_ID = process.env.FATSECRET_CLIENT_ID;
     const CLIENT_SECRET = process.env.FATSECRET_CLIENT_SECRET;
 
@@ -14,7 +13,6 @@ async function getAccessToken(): Promise<string> {
     }
 
     if (!CLIENT_ID || !CLIENT_SECRET) {
-        console.error('❌ Missing FATSECRET_CLIENT_ID or FATSECRET_CLIENT_SECRET in .env');
         throw new Error('FATSECRET_CLIENT_ID and FATSECRET_CLIENT_SECRET are required in .env');
     }
 
@@ -33,17 +31,21 @@ async function getAccessToken(): Promise<string> {
         );
 
         accessToken = response.data.access_token;
-        // Забираем 60 секунд для страховки от рассинхрона времени
         tokenExpiration = Date.now() + (response.data.expires_in - 60) * 1000;
         return accessToken;
-
     } catch (error: any) {
-        console.error('❌ FatSecret Token Generation Error:', error.response?.data || error.message);
         throw error;
     }
 }
 
-export async function searchProductsInFatSecret(query: string) {
+export async function searchProductsInFatSecret(query: string, userLang: string = 'uk') {
+    let searchQuery = query;
+
+    if (userLang === 'uk') {
+        const translatedQuery = await translateText(query, 'en-US');
+        searchQuery = (Array.isArray(translatedQuery) ? translatedQuery[0] : translatedQuery) || query;
+    }
+
     let token = await getAccessToken();
     let response;
 
@@ -51,7 +53,7 @@ export async function searchProductsInFatSecret(query: string) {
         response = await axios.get('https://platform.fatsecret.com/rest/server.api', {
             params: {
                 method: 'foods.search',
-                search_expression: query,
+                search_expression: searchQuery,
                 format: 'json',
                 max_results: 15
             },
@@ -60,41 +62,41 @@ export async function searchProductsInFatSecret(query: string) {
             }
         });
     } catch (error: any) {
-        console.error('❌ FatSecret API HTTP Error:', error.response?.data || error.message);
         return [];
     }
 
-    // 1. ЛОВИМ "ТИХИЕ" ОШИБКИ FATSECRET (внутри ответа 200 OK)
     if (response.data?.error) {
-        console.error('❌ FatSecret API Internal Error:', response.data.error);
-
-        // Код 5 означает, что токен инвалид. Делаем одну попытку рефреша.
         if (response.data.error.code === 5 || response.data.error.message?.toLowerCase().includes('token')) {
-            console.log('🔄 FatSecret token expired on server side. Refreshing and retrying...');
             accessToken = '';
             tokenExpiration = 0;
 
             token = await getAccessToken();
             response = await axios.get('https://platform.fatsecret.com/rest/server.api', {
-                params: { method: 'foods.search', search_expression: query, format: 'json', max_results: 15 },
+                params: { method: 'foods.search', search_expression: searchQuery, format: 'json', max_results: 15 },
                 headers: { 'Authorization': `Bearer ${token}` }
             });
         } else {
-            // Если это не проблема с токеном, просто прерываем поиск
             return [];
         }
     }
 
     const foods = response.data?.foods?.food;
 
-    // 2. Если результатов по запросу нет вообще
     if (!foods) {
         return [];
     }
 
     const foodArray = Array.isArray(foods) ? foods : [foods];
 
-    return foodArray.map((food: any) => {
+    let translatedNames: string[] = [];
+
+    if (userLang === 'uk') {
+        const foodNames = foodArray.map((food: any) => food.food_name);
+        const translationResult = await translateText(foodNames, 'uk');
+        translatedNames = Array.isArray(translationResult) ? translationResult : [translationResult];
+    }
+
+    return foodArray.map((food: any, index: number) => {
         const desc = food.food_description || '';
 
         const getMacro = (regex: RegExp) => {
@@ -102,7 +104,6 @@ export async function searchProductsInFatSecret(query: string) {
             return match ? parseFloat(match[1]) : 0;
         };
 
-        // --- ЛОГИКА ОПРЕДЕЛЕНИЯ ШТУК ---
         let pieceName: string | undefined = undefined;
         const portionMatch = desc.match(/^Per\s+(.*?)\s+-/i);
 
@@ -113,12 +114,15 @@ export async function searchProductsInFatSecret(query: string) {
                 pieceName = portion;
             }
         }
-        // ------------------------------------
+
+        const finalName = userLang === 'uk' && translatedNames[index]
+            ? translatedNames[index]
+            : food.food_name;
 
         return {
             id: food.food_id,
             externalId: food.food_id,
-            name: food.food_name,
+            name: finalName,
             calories: getMacro(/Calories:\s*([\d.]+)kcal/i),
             protein: getMacro(/Protein:\s*([\d.]+)g/i),
             fat: getMacro(/Fat:\s*([\d.]+)g/i),

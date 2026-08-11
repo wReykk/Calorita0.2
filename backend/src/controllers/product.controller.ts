@@ -90,6 +90,10 @@ export class ProductController {
             const userId = req.userId as string;
             const query = req.query.q as string;
 
+            // Визначаємо мову користувача: спочатку з параметрів url (?lang=uk), потім із заголовків браузера
+            const lang = (req.query.lang as string) ||
+                (req.headers['accept-language']?.includes('uk') ? 'uk' : 'en');
+
             if (!query) {
                 res.status(400).json({ message: 'Search query is required' });
                 return;
@@ -97,7 +101,8 @@ export class ProductController {
 
             const localProducts = await productService.searchLocalProducts(userId, query);
 
-            const externalProducts = await productService.searchExternalProducts(query);
+            // Передаємо визначену мову як другий аргумент
+            const externalProducts = await productService.searchExternalProducts(query, lang);
 
             const combinedProducts = [...localProducts, ...externalProducts];
 
