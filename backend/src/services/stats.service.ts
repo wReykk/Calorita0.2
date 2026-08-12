@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../prisma/prisma.config.js';
+import { calculateNutrition } from '../utils/nutritionCalculator.js';
 
 export const getNutritionalStats = async (userId: string) => {
     const user = await prisma.user.findUnique({
@@ -10,12 +9,16 @@ export const getNutritionalStats = async (userId: string) => {
 
     if (!user) throw new Error('User not found');
 
-    const today = new Date();
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(today.getDate() - 30);
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
 
-    const sevenDaysAgo = new Date(today);
-    sevenDaysAgo.setDate(today.getDate() - 7);
+    const thirtyDaysAgo = new Date(today.getTime());
+    thirtyDaysAgo.setUTCDate(today.getUTCDate() - 30);
+    thirtyDaysAgo.setUTCHours(0, 0, 0, 0);
+
+    const sevenDaysAgo = new Date(today.getTime());
+    sevenDaysAgo.setUTCDate(today.getUTCDate() - 7);
+    sevenDaysAgo.setUTCHours(0, 0, 0, 0);
 
     const daysSinceReg = Math.max(1, Math.ceil((today.getTime() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24)));
 
@@ -34,7 +37,9 @@ export const getNutritionalStats = async (userId: string) => {
             calories: true,
             protein: true,
             fat: true,
-            carbs: true
+            carbs: true,
+            amount: true,
+            pieceName: true
         }
     });
 
@@ -59,18 +64,29 @@ export const getNutritionalStats = async (userId: string) => {
     });
 
     entries.forEach(entry => {
-        const entryDate = new Date(entry.date);
+        const logDate = new Date(entry.date);
 
-        monthlySum.calories += entry.calories;
-        monthlySum.protein += entry.protein;
-        monthlySum.fat += entry.fat;
-        monthlySum.carbs += entry.carbs;
+        const nutrition = calculateNutrition(
+            {
+                calories: entry.calories,
+                protein: entry.protein,
+                fat: entry.fat,
+                carbs: entry.carbs
+            },
+            entry.amount,
+            !!entry.pieceName
+        );
 
-        if (entryDate >= sevenDaysAgo) {
-            weeklySum.calories += entry.calories;
-            weeklySum.protein += entry.protein;
-            weeklySum.fat += entry.fat;
-            weeklySum.carbs += entry.carbs;
+        monthlySum.calories += nutrition.calories;
+        monthlySum.protein += nutrition.protein;
+        monthlySum.fat += nutrition.fat;
+        monthlySum.carbs += nutrition.carbs;
+
+        if (logDate >= sevenDaysAgo) {
+            weeklySum.calories += nutrition.calories;
+            weeklySum.protein += nutrition.protein;
+            weeklySum.fat += nutrition.fat;
+            weeklySum.carbs += nutrition.carbs;
         }
     });
 
