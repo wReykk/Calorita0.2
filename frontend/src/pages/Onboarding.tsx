@@ -1,12 +1,15 @@
-import { useNavigate } from 'react-router-dom'
-import UserSettingsForm from '../components/UserSettingsForm'
-import { usePageTitle } from '../hooks/usePageTitle.js'
 import { useTranslation } from 'react-i18next'
+import UserSettingsForm from '../components/UserSettingsForm'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { useOnboarding } from '../hooks/useOnboarding'
 
 function Onboarding() {
-    const navigate = useNavigate()
     const { t } = useTranslation()
     usePageTitle(t('onboarding.pageTitle', 'Onboarding'))
+
+    const {
+        actions: { handleOnboardingSuccess }
+    } = useOnboarding()
 
     return (
         <div className="mx-auto flex max-w-5xl flex-col gap-6">
@@ -25,31 +28,10 @@ function Onboarding() {
             <UserSettingsForm
                 isOnboarding
                 submitLabel={t('onboarding.completeButton', 'Complete onboarding')}
-                onSubmitSuccess={() => {
-                    const storedUser = localStorage.getItem('user')
-
-                    if (storedUser) {
-                        try {
-                            const parsedUser = JSON.parse(storedUser)
-                            const refreshedUser = {
-                                ...parsedUser,
-                                weight: parsedUser.weight ?? null,
-                                height: parsedUser.height ?? null,
-                                goal: parsedUser.goal ?? null,
-                            }
-                            localStorage.setItem('user', JSON.stringify(refreshedUser))
-                        } catch {
-                            console.error('Failed to parse user data from localStorage.')
-                        }
-                    }
-
-                    navigate('/', { replace: true })
-                }}
+                onSubmitSuccess={handleOnboardingSuccess}
             />
         </div>
     )
 }
-
-
 
 export default Onboarding
