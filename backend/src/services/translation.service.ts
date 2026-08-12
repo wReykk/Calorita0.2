@@ -8,9 +8,8 @@ export const translateText = async (
     targetLang: deepl.TargetLanguageCode
 ): Promise<string | string[]> => {
     try {
-        if (!authKey) return text; // Если ключа нет, возвращаем как есть, чтобы не ломать приложение
+        if (!authKey) return text;
 
-        // null означает, что DeepL сам автоопределит язык оригинала
         const result = await translator.translateText(text, null, targetLang);
 
         if (Array.isArray(result)) {

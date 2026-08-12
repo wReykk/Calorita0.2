@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
 import RecipeBuilder from '../components/RecipeBuilder'
 import { recipeService, type Recipe, type RecipeDetails } from '../services/recipe.service'
-import { usePageTitle } from '../hooks/usePageTitle' // убрал .js, в TS обычно без расширения
+import { usePageTitle } from '../hooks/usePageTitle'
 
 type Product = {
     id: number
@@ -44,7 +44,6 @@ function Products() {
     const [pieceName, setPieceName] = useState('')
     const [editState, setEditState] = useState<EditState>({ productId: null, values: emptyForm })
 
-    // Состояния для рецептов
     const [activeTab, setActiveTab] = useState<'products' | 'recipes'>('products')
     const [recipes, setRecipes] = useState<Recipe[]>([])
     const [recipesLoading, setRecipesLoading] = useState(false)
@@ -56,7 +55,6 @@ function Products() {
     const { t } = useTranslation()
     usePageTitle(t('home.pageTitle', 'My Collection'))
 
-    // Загрузка продуктов
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -72,7 +70,6 @@ function Products() {
         fetchProducts()
     }, [t])
 
-    // Загрузка рецептов при переключении вкладки
     const fetchRecipes = useCallback(async () => {
         setRecipesLoading(true)
         setRecipesError('')
@@ -193,7 +190,6 @@ function Products() {
     return (
         <>
             <div className="space-y-6">
-                {/* HEADER AND TABS */}
                 <div className="flex items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-semibold">{t('products.title')}</h1>
@@ -219,9 +215,7 @@ function Products() {
                     </div>
                 </div>
 
-                {/* TAB CONTENT */}
                 {activeTab === 'recipes' ? (
-                    // RECIPES TAB
                     <div className="space-y-4">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <div>
@@ -277,7 +271,6 @@ function Products() {
                                                     </button>
                                                 </div>
 
-                                                {/* Вывод макросов для рецепта на 100г */}
                                                 <div className="grid grid-cols-2 gap-2 text-sm text-slate-600 mt-2">
                                                     <div className="rounded-lg bg-slate-50 p-2">
                                                         <p className="text-xs uppercase tracking-wide text-slate-400">{t('products.calories')}</p>
@@ -304,7 +297,6 @@ function Products() {
                         </div>
                     </div>
                 ) : (
-                    // PRODUCTS TAB
                     <div className="space-y-6">
                         <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                             <div className="mb-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5">

@@ -2,19 +2,16 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import apiClient from '../assets/api/client';
 
-// 1. Описываем пропсы: виджет теперь ждет дату снаружи
 interface WaterTrackerProps {
     selectedDate?: Date | string;
 }
 
-// 2. Принимаем selectedDate
 export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
     const { t } = useTranslation();
     const [waterTotal, setWaterTotal] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-    // 3. Форматируем дату для бэкенда (или берем сегодняшнюю по умолчанию)
     const activeDate = selectedDate ? new Date(selectedDate).toISOString() : new Date().toISOString();
 
     const DAILY_GOAL = 2000;
@@ -23,7 +20,6 @@ export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
     useEffect(() => {
         const fetchWater = async () => {
             try {
-                // 4. Передаем дату в запросе
                 const response = await apiClient.get(`/water/today?date=${activeDate}`);
                 setWaterTotal(response.data.total);
             } catch (error) {
@@ -34,7 +30,7 @@ export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
         };
 
         void fetchWater();
-    }, [activeDate]); // 5. Перезагружаем данные, когда дата меняется!
+    }, [activeDate]);
 
     const handleAddWater = async (amount: number) => {
         if (isProcessing) return;
@@ -42,7 +38,6 @@ export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
 
         try {
             setWaterTotal(prev => prev + amount);
-            // 6. Передаем дату при добавлении
             await apiClient.post('/water', { amount, date: activeDate });
         } catch (error) {
             console.error('Failed to add water:', error);
@@ -60,7 +55,6 @@ export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
 
         try {
             setWaterTotal(prev => prev - amountToRemove);
-            // 7. Передаем дату при удалении
             await apiClient.delete(`/water/${amountToRemove}?date=${activeDate}`);
         } catch (error) {
             console.error('Failed to remove water:', error);
@@ -69,8 +63,6 @@ export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
             setIsProcessing(false);
         }
     };
-
-    // ... остальной код рендера остается без изменений
 
     if (isLoading) {
         return (
@@ -140,7 +132,6 @@ export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
                     <span className="mt-1 text-sm font-semibold">+500</span>
                 </button>
 
-                {/* Ряд удаления (более бледный/красный дизайн) */}
                 <button
                     onClick={() => handleRemoveWater(250)}
                     disabled={isProcessing || waterTotal === 0}

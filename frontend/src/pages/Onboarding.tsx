@@ -39,7 +39,7 @@ function Onboarding() {
                             }
                             localStorage.setItem('user', JSON.stringify(refreshedUser))
                         } catch {
-                            // Ignore parse errors and continue
+                            console.error('Failed to parse user data from localStorage.')
                         }
                     }
 

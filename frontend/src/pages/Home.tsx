@@ -88,11 +88,7 @@ function Home() {
                 {userData && (
                     <WeightReminder weightLogs={userData.weightLogs || []} />
                 )}
-                {/* --- Максимально сжатые отступы шапки --- */}
                 <div className="mb-2 text-center">
-                    {/* <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-500">
-                        {t('home.welcomeBackSubtitle')}
-                    </p> */}
                     <h1 className="text-1xl font-semibold tracking-tight text-gray-900 sm:text-1xl">
                         {t('home.welcomeBackTitle')}
                     </h1>
@@ -101,9 +97,7 @@ function Home() {
                     </p>
                 </div>
 
-                {/* --- Убрали lg:items-start, чтобы колонки тянулись одинаково --- */}
                 <div className="mt-6 grid gap-6 md:grid-cols-2">
-                    {/* ЛЕВАЯ КОЛОНКА */}
                     <div className="flex min-w-0 flex-col gap-6">
                         <ActivityStreak
                             currentStreak={userData?.currentStreak}
@@ -135,11 +129,8 @@ function Home() {
                         </button>
                     </div>
 
-                    {/* ПРАВАЯ КОЛОНКА */}
                     <div className="flex min-w-0 flex-col gap-6">
                         <NutritionalStats stats={statsData} />
-
-                        {/* Обернули WaterStats в flex-1, чтобы он заполнял всю оставшуюся высоту */}
                         {statsData && (
                             <div className="flex-1">
                                 <WaterStats

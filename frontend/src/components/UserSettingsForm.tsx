@@ -149,7 +149,7 @@ function UserSettingsForm({ isOnboarding = false, onSubmitSuccess, submitLabel }
                     setLastUpdated(formatDisplayDate(user.updatedAt))
                 }
             } catch {
-                // Keep the existing local values if the request fails.
+                console.error('Failed to fetch latest user data:', Error);
             }
         }
 

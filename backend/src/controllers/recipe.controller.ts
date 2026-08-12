@@ -16,13 +16,11 @@ export class RecipeController {
 
             const { name, totalWeight, ingredients } = req.body;
 
-            // Базовая валидация
             if (!name || !totalWeight || !ingredients || !Array.isArray(ingredients)) {
                 res.status(400).json({ message: 'Incorrect data for recipe.' });
                 return;
             }
 
-            // Вызываем наш сервис
             const recipe = await recipeService.createRecipe(userId, {
                 name,
                 totalWeight,
@@ -86,10 +84,8 @@ export class RecipeController {
                 return;
             }
 
-            // Вызываем метод удаления из сервиса
             await recipeService.deleteRecipe(req.params.id as string, userId);
 
-            // Отправляем успешный ответ без тела (или с простым сообщением)
             res.status(200).json({ message: 'Recipe deleted successfully' });
         } catch (error: any) {
             res.status(500).json({ message: error.message });

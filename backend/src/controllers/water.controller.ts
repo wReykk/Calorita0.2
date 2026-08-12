@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import type { AuthRequest } from '../middlewares/auth.middleware.js'; // Проверь свой путь
+import type { AuthRequest } from '../middlewares/auth.middleware.js';
 import { getTodayWaterIntake, addWaterLog, removeWaterLog } from '../services/water.service.js';
 
 export const getWater = async (req: AuthRequest, res: Response) => {
@@ -7,7 +7,7 @@ export const getWater = async (req: AuthRequest, res: Response) => {
         const userId = req.userId;
         if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-        const date = req.query.date as string; // Ловим дату из URL
+        const date = req.query.date as string;
         const total = await getTodayWaterIntake(userId, date);
         res.json({ total });
     } catch (error) {
@@ -37,7 +37,7 @@ export const deleteWater = async (req: AuthRequest, res: Response) => {
         if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
         const amount = Number(req.params.amount);
-        const date = req.query.date as string; // Ловим дату из URL
+        const date = req.query.date as string;
 
         await removeWaterLog(userId, amount, date);
 

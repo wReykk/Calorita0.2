@@ -161,12 +161,11 @@ function RecipeBuilder({ open, onClose, onSaveSuccess, initialData }: RecipeBuil
 
         try {
             const payload = {
-                name: name.trim(), // или как у тебя называется переменная
+                name: name.trim(),
                 totalWeight: parsedWeight,
                 ingredients: ingredients.map(ing => ({
                     productId: String(ing.id),
                     amount: ing.amount,
-                    // ДОБАВЛЯЕМ ВОТ ЭТИ ПОЛЯ (чтобы бэкенд мог создать продукт):
                     name: ing.name,
                     calories: ing.calories,
                     protein: ing.protein,
@@ -379,7 +378,7 @@ function RecipeBuilder({ open, onClose, onSaveSuccess, initialData }: RecipeBuil
                                 {t('recipeBuilder.delete', 'Delete Recipe')}
                             </button>
                         ) : (
-                            <div /> // Пустой блок, чтобы flex-justify-between корректно расставил остальные кнопки вправо
+                            <div />
                         )}
 
                         <div className="flex gap-3">

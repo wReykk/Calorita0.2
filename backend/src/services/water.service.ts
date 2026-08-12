@@ -2,13 +2,12 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Вспомогательная функция для получения начала и конца нужного дня
 const getDayBounds = (dateParam?: string) => {
     const date = dateParam ? new Date(dateParam) : new Date();
-    date.setHours(0, 0, 0, 0); // Начало дня
+    date.setHours(0, 0, 0, 0);
 
     const tomorrow = new Date(date);
-    tomorrow.setDate(tomorrow.getDate() + 1); // Начало следующего дня
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     return { date, tomorrow };
 };
@@ -32,7 +31,6 @@ export const getTodayWaterIntake = async (userId: string, dateParam?: string) =>
 export const addWaterLog = async (userId: string, amount: number, dateParam?: string) => {
     if (!amount || amount <= 0) throw new Error('INVALID_AMOUNT');
 
-    // Если добавляем воду в прошлый день, ставим время на 12:00 этого дня
     const logDate = dateParam ? new Date(dateParam) : new Date();
     if (dateParam) logDate.setHours(12, 0, 0, 0);
 

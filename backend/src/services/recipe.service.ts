@@ -3,7 +3,6 @@ import { prisma } from '../prisma/prisma.config.js';
 interface IngredientInput {
     productId: string;
     amount: number;
-    // Добавлены поля для сохранения продуктов из FatSecret
     name?: string;
     calories?: number;
     protein?: number;
@@ -29,14 +28,11 @@ export class RecipeService {
 
         let totalCalories = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
         const resolvedIngredients: { localProductId: string; amount: number }[] = [];
-        // Проходим по каждому ингредиенту по очереди
         for (const item of data.ingredients) {
-            // 1. Ищем продукт в локальной БД
             let product = await prisma.product.findFirst({
                 where: { id: item.productId }
             });
 
-            // 2. Если его нет (это продукт из FatSecret) - создаем локальную копию
             if (!product) {
                 if (!item.name || item.calories === undefined) {
                     throw new Error(`Ingredient data is missing for external product ${item.productId}`);
@@ -87,7 +83,6 @@ export class RecipeService {
                 }
             });
 
-            // Используем локальные ID, которые мы собрали в цикле
             const ingredientsData = resolvedIngredients.map(item => ({
                 recipeId: recipe.id,
                 ingredientId: item.localProductId,

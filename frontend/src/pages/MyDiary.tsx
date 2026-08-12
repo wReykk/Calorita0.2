@@ -351,14 +351,12 @@ function MyDiary() {
 
             <div className="grid gap-6">
                 <div className="space-y-4">
-                    {/* Убрали items-start, теперь колонки снова равны по высоте! */}
                     <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
                         <div className="min-w-0 lg:col-span-2">
                             <DailyProgress targetMacros={targetMacros} consumedMacros={consumedMacros} />
                         </div>
 
                         <div className="min-w-0 lg:col-span-1">
-                            {/* WaterTracker сам растянется благодаря h-full внутри него */}
                             <WaterTracker selectedDate={selectedDate} />
                         </div>
                     </div>
@@ -567,30 +565,6 @@ function MyDiary() {
                         )}
                     </div>
                 </div>
-
-                {/* <div className="rounded-3xl border border-slate-200 bg-slate-900 p-6 text-white shadow-sm">
-                    <h2 className="text-lg font-semibold" style={{ color: '#ffffff' }}>{t('myDiary.dailySummary')}</h2>
-                    <p className="mt-2 text-sm text-slate-300 " >{t('myDiary.dailySummarySubtitle')}</p>
-
-                    <div className="mt-6 grid gap-3">
-                        <div className="rounded-2xl bg-white/10 p-4">
-                            <p className="text-sm text-slate-300">{t('myDiary.calories')}</p>
-                            <p className="text-2xl font-semibold">{t('myDiary.kcalLabel', { amount: summary.totalCalories.toFixed(0) })}</p>
-                        </div>
-                        <div className="rounded-2xl bg-white/10 p-4">
-                            <p className="text-sm text-slate-300">{t('myDiary.protein')}</p>
-                            <p className="text-2xl font-semibold">{t('myDiary.proteinValue', { amount: summary.totalProtein.toFixed(1) })}</p>
-                        </div>
-                        <div className="rounded-2xl bg-white/10 p-4">
-                            <p className="text-sm text-slate-300">{t('myDiary.fat')}</p>
-                            <p className="text-2xl font-semibold">{t('myDiary.fatValue', { amount: summary.totalFat.toFixed(1) })}</p>
-                        </div>
-                        <div className="rounded-2xl bg-white/10 p-4">
-                            <p className="text-sm text-slate-300">{t('myDiary.carbs')}</p>
-                            <p className="text-2xl font-semibold">{t('myDiary.carbsValue', { amount: summary.totalCarbs.toFixed(1) })}</p>
-                        </div>
-                    </div>
-                </div> */}
             </div>
 
         </div>

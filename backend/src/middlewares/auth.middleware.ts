@@ -7,11 +7,6 @@ export interface AuthRequest extends Request {
     userId?: string;
 }
 
-
-// export interface BaseAuthRequest extends Request {
-//     userId?: string;
-// }
-
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
     try {
         const authHeader = req.headers.authorization;

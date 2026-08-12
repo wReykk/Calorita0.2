@@ -3,18 +3,16 @@ import { useNavigate } from 'react-router-dom';
 
 interface WeightReminderProps {
     weightLogs: { date: string }[];
-    onClose?: () => void; // На случай, если захочешь дать возможность закрывать баннер
+    onClose?: () => void;
 }
 
 export default function WeightReminder({ weightLogs }: WeightReminderProps) {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    // Функция проверки: прошло ли 7 дней с последней записи
     const checkNeedsUpdate = () => {
-        if (!weightLogs || weightLogs.length === 0) return true; // Если записей нет вообще
+        if (!weightLogs || weightLogs.length === 0) return true;
 
-        // Находим самую свежую запись (на случай, если массив не отсортирован)
         const latestLog = weightLogs.reduce((latest, current) => {
             return new Date(current.date) > new Date(latest.date) ? current : latest;
         });
@@ -22,7 +20,6 @@ export default function WeightReminder({ weightLogs }: WeightReminderProps) {
         const today = new Date();
         const lastLogDate = new Date(latestLog.date);
 
-        // Считаем разницу в днях
         const diffTime = today.getTime() - lastLogDate.getTime();
         const diffDays = diffTime / (1000 * 60 * 60 * 24);
 
@@ -30,7 +27,7 @@ export default function WeightReminder({ weightLogs }: WeightReminderProps) {
     };
 
     if (!checkNeedsUpdate()) {
-        return null; // Если 7 дней еще не прошло, баннер не рендерится
+        return null;
     }
 
     return (
