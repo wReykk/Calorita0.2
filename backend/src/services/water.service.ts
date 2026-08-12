@@ -1,15 +1,19 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../prisma/prisma.config.js';
 
 const getDayBounds = (dateParam?: string) => {
-    const date = dateParam ? new Date(dateParam) : new Date();
-    date.setHours(0, 0, 0, 0);
+    const targetDate = dateParam ? new Date(dateParam) : new Date();
 
-    const tomorrow = new Date(date);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const startOfDay = new Date(Date.UTC(
+        targetDate.getUTCFullYear(),
+        targetDate.getUTCMonth(),
+        targetDate.getUTCDate(),
+        0, 0, 0, 0
+    ));
 
-    return { date, tomorrow };
+    const tomorrow = new Date(startOfDay.getTime());
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+
+    return { date: startOfDay, tomorrow };
 };
 
 export const getTodayWaterIntake = async (userId: string, dateParam?: string) => {
@@ -32,7 +36,10 @@ export const addWaterLog = async (userId: string, amount: number, dateParam?: st
     if (!amount || amount <= 0) throw new Error('INVALID_AMOUNT');
 
     const logDate = dateParam ? new Date(dateParam) : new Date();
-    if (dateParam) logDate.setHours(12, 0, 0, 0);
+
+    if (dateParam) {
+        logDate.setUTCHours(12, 0, 0, 0);
+    }
 
     return await prisma.waterLog.create({
         data: { userId, amount: Number(amount), date: logDate }
@@ -46,7 +53,10 @@ export const removeWaterLog = async (userId: string, amount: number, dateParam?:
     if (currentTotal < amount) throw new Error('NOT_ENOUGH_WATER_TO_REMOVE');
 
     const logDate = dateParam ? new Date(dateParam) : new Date();
-    if (dateParam) logDate.setHours(12, 0, 0, 0);
+
+    if (dateParam) {
+        logDate.setUTCHours(12, 0, 0, 0);
+    }
 
     return await prisma.waterLog.create({
         data: { userId, amount: -Number(amount), date: logDate }
