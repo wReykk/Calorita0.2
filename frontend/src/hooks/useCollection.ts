@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
-import { recipeService, type Recipe, type RecipeDetails } from '../services/recipe.service'
+import { recipeService } from '../services/recipe.service'
+import { type Recipe, type RecipeDetails } from '../types/recipe.types'
 import type { Product, ProductFormState, EditState } from '../types/collection.types'
 
 export const emptyForm: ProductFormState = {

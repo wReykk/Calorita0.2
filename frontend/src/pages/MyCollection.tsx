@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { usePageTitle } from '../hooks/usePageTitle'
 import RecipeBuilder from '../components/RecipeBuilder'
 import { useCollection, emptyForm } from '../hooks/useCollection'
-import type { Recipe } from '../services/recipe.service'
+import type { Recipe } from '../types/recipe.types'
 
 function Products() {
     const { t } = useTranslation()

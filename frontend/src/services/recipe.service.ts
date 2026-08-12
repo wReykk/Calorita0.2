@@ -1,42 +1,5 @@
 import apiClient from '../assets/api/client'
-
-export type IngredientInput = {
-    productId: string
-    amount: number
-}
-
-export type RecipePayload = {
-    name: string
-    totalWeight: number
-    ingredients: IngredientInput[]
-}
-
-export type Recipe = {
-    id: string
-    name: string
-    calories: number
-    protein: number | null
-    fat: number | null
-    carbs: number | null
-    totalWeight?: number
-}
-
-export type RecipeIngredient = {
-    ingredientId: string
-    amount: number
-    ingredient?: {
-        name: string
-        calories?: number | null
-        protein?: number | null
-        fat?: number | null
-        carbs?: number | null
-        pieceName?: string | null
-    }
-}
-
-export type RecipeDetails = Recipe & {
-    recipeIngredients: RecipeIngredient[]
-}
+import type { RecipePayload, Recipe, RecipeDetails } from '../types/recipe.types'
 
 export const recipeService = {
     createRecipe: async (payload: RecipePayload) => {

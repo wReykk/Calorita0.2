@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import type { RecipeDetails } from '../services/recipe.service'
+import type { RecipeDetails } from '../types/recipe.types'
 import { useRecipeBuilder } from '../hooks/useRecipeBuilder'
 
 type RecipeBuilderProps = {

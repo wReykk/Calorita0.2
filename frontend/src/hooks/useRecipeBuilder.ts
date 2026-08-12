@@ -1,7 +1,8 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../assets/api/client'
-import { recipeService, type RecipeDetails } from '../services/recipe.service'
+import { type RecipeDetails } from '../types/recipe.types'
+import { recipeService } from '../services/recipe.service'
 import type { ProductOption, Ingredient } from '../types/recipe.types'
 
 type UseRecipeBuilderProps = {
