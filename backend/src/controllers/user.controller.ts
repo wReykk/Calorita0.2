@@ -1,16 +1,12 @@
-import type { Request, Response } from 'express';
+import type { Response, NextFunction } from 'express';
 import type { AuthRequest } from '../middlewares/auth.middleware.js';
 import * as userService from '../services/user.service.js';
 import { checkAndUpdateStreak } from '../services/streak.service.js';
 import { getNutritionalStats } from '../services/stats.service.js';
 
-export const getCurrentUser = async (req: AuthRequest, res: Response) => {
+export const getCurrentUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId;
-
-        if (!userId) {
-            return res.status(401).json({ error: 'Access denied. No token' });
-        }
+        const userId = req.userId as string;
 
         await checkAndUpdateStreak(userId);
 
@@ -25,19 +21,18 @@ export const getCurrentUser = async (req: AuthRequest, res: Response) => {
             stats
         });
     } catch (error: any) {
-        console.error('Error in userController:', error);
-
         if (error.message === 'USER_NOT_FOUND') {
-            return res.status(404).json({ error: 'User not found.' });
+            res.status(404).json({ error: 'User not found.' });
+            return;
         }
 
-        res.status(500).json({ error: 'Server error.' });
+        next(error);
     }
 };
 
-export const updateParameters = async (req: Request<{ id: string }>, res: Response) => {
+export const updateParameters = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { id } = req.params;
+        const id = req.params.id as string;
 
         const updatedUser = await userService.updateUserParameters(id, req.body);
         const { estimatedWeeksToGoal, ...userData } = updatedUser;
@@ -49,18 +44,19 @@ export const updateParameters = async (req: Request<{ id: string }>, res: Respon
             estimatedWeeksToGoal,
         });
     } catch (error: any) {
-        console.error('Error in userController:', error);
-
         if (error.message === 'MISSING_DATA') {
-            return res.status(400).json({ error: 'Fill everything.' });
+            res.status(400).json({ error: 'Fill everything.' });
+            return;
         }
         if (error.message === 'INVALID_WEIGHT_GAIN') {
-            return res.status(400).json({ error: 'Target weight must be higher than current weight for GAIN goal.' });
+            res.status(400).json({ error: 'Target weight must be higher than current weight for GAIN goal.' });
+            return;
         }
         if (error.message === 'INVALID_WEIGHT_LOSE') {
-            return res.status(400).json({ error: 'Target weight must be lower than current weight for LOSE goal.' });
+            res.status(400).json({ error: 'Target weight must be lower than current weight for LOSE goal.' });
+            return;
         }
 
-        res.status(500).json({ error: 'Server error.' });
+        next(error);
     }
 };

@@ -1,9 +1,19 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../prisma/prisma.config.js';
 import { calculateMacros } from '../utils/calculator.js';
+import type { Sex, ActivityLevel, Goal, Pace } from '@prisma/client';
 
-const prisma = new PrismaClient();
+interface UpdateUserParams {
+    weight: number;
+    height: number;
+    dateOfBirth: string | Date;
+    sex: Sex;
+    activityLevel: ActivityLevel;
+    goal: Goal;
+    pace: Pace;
+    targetWeight?: number | null;
+}
 
-const calculateAge = (dob: string | Date) => {
+const calculateAge = (dob: string | Date): number => {
     const diffMs = Date.now() - new Date(dob).getTime();
     const ageDate = new Date(diffMs);
     return Math.abs(ageDate.getUTCFullYear() - 1970);
@@ -56,27 +66,26 @@ export const getUserById = async (id: string) => {
     };
 };
 
-export const updateUserParameters = async (id: string, data: any) => {
-    const { weight, height, dateOfBirth, sex, activityLevel, goal, pace, targetWeight } = data;
-
+export const updateUserParameters = async (id: string, data: UpdateUserParams) => {
+    const { weight, height, dateOfBirth, sex, activityLevel, goal, pace } = data;
+    let finalTargetWeight = data.targetWeight;
 
     if (!weight || !height || !dateOfBirth || !sex || !activityLevel || !goal || !pace) {
         throw new Error('MISSING_DATA');
     }
 
-    if (weight && targetWeight && goal) {
-
-        if (goal === 'GAIN' && targetWeight <= weight) {
+    if (weight && finalTargetWeight && goal) {
+        if (goal === 'GAIN' && finalTargetWeight <= weight) {
             throw new Error('INVALID_WEIGHT_GAIN');
         }
 
-        if (goal === 'LOSE' && targetWeight >= weight) {
+        if (goal === 'LOSE' && finalTargetWeight >= weight) {
             throw new Error('INVALID_WEIGHT_LOSE');
         }
+    }
 
-        if (goal === 'MAINTAIN' && targetWeight !== weight) {
-            data.targetWeight = data.weight;
-        }
+    if (goal === 'MAINTAIN') {
+        finalTargetWeight = weight;
     }
 
     const age = calculateAge(dateOfBirth);
@@ -89,14 +98,14 @@ export const updateUserParameters = async (id: string, data: any) => {
         activityLevel,
         goal,
         pace,
-        targetWeight: targetWeight ? Number(targetWeight) : null
+        targetWeight: finalTargetWeight ? Number(finalTargetWeight) : null
     });
 
     const updatedUser = await prisma.user.update({
         where: { id },
         data: {
             weight: Number(weight),
-            targetWeight: targetWeight ? Number(targetWeight) : null,
+            targetWeight: finalTargetWeight ? Number(finalTargetWeight) : null,
             height: Number(height),
             dateOfBirth: new Date(dateOfBirth),
             sex,
