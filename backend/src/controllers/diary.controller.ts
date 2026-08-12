@@ -5,7 +5,7 @@ import { prisma } from '../prisma/prisma.config.js';
 
 export const addEntry = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const { productId, productData, amount, date } = req.body;
 
         let finalProductId = productId;
@@ -50,7 +50,7 @@ export const addEntry = async (req: AuthRequest, res: Response, next: NextFuncti
 
 export const getEntries = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const entries = await diaryService.getEntries(userId);
 
         res.status(200).json(entries);

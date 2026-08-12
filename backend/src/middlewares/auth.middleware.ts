@@ -3,11 +3,15 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
-export interface AuthRequest extends Request {
+export interface BaseAuthRequest extends Request {
     userId?: string;
 }
 
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
+export interface AuthRequest extends Request {
+    userId: string;
+}
+
+export const authenticate = (req: BaseAuthRequest, res: Response, next: NextFunction): void => {
     try {
         const authHeader = req.headers.authorization;
 

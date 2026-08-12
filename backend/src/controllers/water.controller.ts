@@ -4,7 +4,7 @@ import * as waterService from '../services/water.service.js';
 
 export const getWater = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const date = req.query.date as string;
 
         const total = await waterService.getTodayWaterIntake(userId, date);
@@ -17,7 +17,7 @@ export const getWater = async (req: AuthRequest, res: Response, next: NextFuncti
 
 export const addWater = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const { amount, date } = req.body;
 
         await waterService.addWaterLog(userId, amount, date);
@@ -37,7 +37,7 @@ export const addWater = async (req: AuthRequest, res: Response, next: NextFuncti
 
 export const deleteWater = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const amount = Number(req.params.amount);
         const date = req.query.date as string;
 

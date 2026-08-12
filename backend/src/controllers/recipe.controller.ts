@@ -4,7 +4,7 @@ import * as recipeService from '../services/recipe.service.js';
 
 export const createRecipe = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const { name, totalWeight, ingredients } = req.body;
 
         if (!name || !totalWeight || !ingredients || !Array.isArray(ingredients)) {
@@ -26,7 +26,7 @@ export const createRecipe = async (req: AuthRequest, res: Response, next: NextFu
 
 export const getUserRecipes = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const recipes = await recipeService.getUserRecipes(userId);
 
         res.status(200).json(recipes);
@@ -37,7 +37,7 @@ export const getUserRecipes = async (req: AuthRequest, res: Response, next: Next
 
 export const getRecipeById = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const recipeId = req.params.id as string;
 
         const recipe = await recipeService.getRecipeById(recipeId, userId);
@@ -50,7 +50,7 @@ export const getRecipeById = async (req: AuthRequest, res: Response, next: NextF
 
 export const updateRecipe = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const recipeId = req.params.id as string;
         const { name, totalWeight, ingredients } = req.body;
 
@@ -73,7 +73,7 @@ export const updateRecipe = async (req: AuthRequest, res: Response, next: NextFu
 
 export const deleteRecipe = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const recipeId = req.params.id as string;
 
         await recipeService.deleteRecipe(recipeId, userId);

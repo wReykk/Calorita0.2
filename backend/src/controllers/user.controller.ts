@@ -6,7 +6,7 @@ import { getNutritionalStats } from '../services/stats.service.js';
 
 export const getCurrentUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
 
         await checkAndUpdateStreak(userId);
 

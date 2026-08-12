@@ -4,7 +4,7 @@ import type { AuthRequest } from '../middlewares/auth.middleware.js';
 
 export const getProducts = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const products = await productService.getAllProducts(userId);
         res.status(200).json(products);
     } catch (error) {
@@ -15,7 +15,7 @@ export const getProducts = async (req: AuthRequest, res: Response, next: NextFun
 export const getProductById = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
         const id = req.params.id as string;
-        const userId = req.userId as string;
+        const userId = req.userId
 
         const product = await productService.getProductById(id, userId);
 
@@ -32,7 +32,7 @@ export const getProductById = async (req: AuthRequest, res: Response, next: Next
 
 export const createProduct = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const { name, calories, protein, fat, carbs, description, pieceName } = req.body;
 
         const newProduct = await productService.createProduct(userId, {
@@ -54,7 +54,7 @@ export const createProduct = async (req: AuthRequest, res: Response, next: NextF
 export const updateProduct = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
         const id = req.params.id as string;
-        const userId = req.userId as string;
+        const userId = req.userId
 
         const updatedProduct = await productService.updateProduct(id, userId, req.body);
 
@@ -67,7 +67,7 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
 export const deleteProduct = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
         const id = req.params.id as string;
-        const userId = req.userId as string;
+        const userId = req.userId
 
         await productService.deleteProduct(id, userId);
 
@@ -79,7 +79,7 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
 
 export const searchProducts = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.userId as string;
+        const userId = req.userId
         const query = req.query.q as string;
 
         const lang = (req.query.lang as string) ||
