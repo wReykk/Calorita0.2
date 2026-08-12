@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../prisma/prisma.config.js';
 
 export const checkAndUpdateStreak = async (userId: string) => {
     const user = await prisma.user.findUnique({
@@ -10,12 +8,13 @@ export const checkAndUpdateStreak = async (userId: string) => {
 
     if (!user) throw new Error('User not found');
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
 
-    const lastActive = user.lastActiveDate ? new Date(user.lastActiveDate) : null;
-    if (lastActive) {
-        lastActive.setHours(0, 0, 0, 0);
+    let lastActive = null;
+    if (user.lastActiveDate) {
+        const la = new Date(user.lastActiveDate);
+        lastActive = new Date(Date.UTC(la.getUTCFullYear(), la.getUTCMonth(), la.getUTCDate(), 0, 0, 0, 0));
     }
 
     let newStreak = user.currentStreak;
