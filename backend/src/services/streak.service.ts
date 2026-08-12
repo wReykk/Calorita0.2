@@ -1,4 +1,5 @@
 import { prisma } from '../prisma/prisma.config.js';
+import { getUTCToday } from '../utils/date.js';
 
 export const checkAndUpdateStreak = async (userId: string) => {
     const user = await prisma.user.findUnique({
@@ -8,8 +9,7 @@ export const checkAndUpdateStreak = async (userId: string) => {
 
     if (!user) throw new Error('User not found');
 
-    const now = new Date();
-    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+    const today = getUTCToday();
 
     let lastActive = null;
     if (user.lastActiveDate) {

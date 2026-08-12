@@ -1,29 +1,13 @@
 import { prisma } from '../prisma/prisma.config.js';
-
-const getDayBounds = (dateParam?: string) => {
-    const targetDate = dateParam ? new Date(dateParam) : new Date();
-
-    const startOfDay = new Date(Date.UTC(
-        targetDate.getUTCFullYear(),
-        targetDate.getUTCMonth(),
-        targetDate.getUTCDate(),
-        0, 0, 0, 0
-    ));
-
-    const tomorrow = new Date(startOfDay.getTime());
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-
-    return { date: startOfDay, tomorrow };
-};
+import { getDayBounds } from '../utils/date.js';
 
 export const getTodayWaterIntake = async (userId: string, dateParam?: string) => {
-    const { date, tomorrow } = getDayBounds(dateParam);
-
+    const { startOfDay, tomorrow } = getDayBounds(dateParam);
     const logs = await prisma.waterLog.findMany({
         where: {
             userId,
             date: {
-                gte: date,
+                gte: startOfDay,
                 lt: tomorrow
             }
         }

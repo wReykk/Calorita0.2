@@ -1,24 +1,5 @@
 import { prisma } from '../prisma/prisma.config.js';
-
-export interface IngredientInput {
-    productId: string;
-    amount: number;
-    name?: string;
-    calories?: number;
-    protein?: number;
-    fat?: number;
-    carbs?: number;
-    pieceName?: string;
-}
-
-export interface Recipe {
-    id: number;
-    name: string;
-    calories: number;
-    protein: number;
-    fat: number;
-    carbs: number;
-}
+import type { IngredientInput } from '../types/recipe.interface.js';
 
 const processIngredients = async (ingredients: IngredientInput[], userId: string) => {
     let totalCalories = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
