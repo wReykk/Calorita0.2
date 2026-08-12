@@ -16,7 +16,6 @@ export const useDiary = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
-    // Формы и редактирование
     const [productId, setProductId] = useState('')
     const [weight, setWeight] = useState('')
     const [selectedServingDescription, setSelectedServingDescription] = useState('')
@@ -50,7 +49,6 @@ export const useDiary = () => {
         ? t('myDiary.weight', 'Weight (g)')
         : t('myDiary.quantity', 'Quantity')
 
-    // Поиск продуктов
     useEffect(() => {
         if (searchQuery.trim().length < 2) {
             setTimeout(() => {
@@ -81,7 +79,6 @@ export const useDiary = () => {
         return () => window.clearTimeout(timeoutId)
     }, [searchQuery, i18n.language])
 
-    // Загрузка записей дневника
     useEffect(() => {
         const fetchEntries = async () => {
             setLoading(true)

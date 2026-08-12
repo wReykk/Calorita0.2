@@ -1,191 +1,44 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import apiClient from '../assets/api/client'
-import RecipeBuilder from '../components/RecipeBuilder'
-import { recipeService, type Recipe, type RecipeDetails } from '../services/recipe.service'
 import { usePageTitle } from '../hooks/usePageTitle'
-
-type Product = {
-    id: number
-    name: string
-    calories?: number | null
-    protein?: number | null
-    fat?: number | null
-    carbs?: number | null
-    description?: string | null
-}
-
-type ProductFormState = {
-    name: string
-    calories: string
-    protein: string
-    fat: string
-    carbs: string
-}
-
-type EditState = {
-    productId: number | null
-    values: ProductFormState
-}
-
-const emptyForm = {
-    name: '',
-    calories: '',
-    protein: '',
-    fat: '',
-    carbs: '',
-}
+import RecipeBuilder from '../components/RecipeBuilder'
+import { useCollection, emptyForm } from '../hooks/useCollection'
+import type { Recipe } from '../services/recipe.service'
 
 function Products() {
-    const [products, setProducts] = useState<Product[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
-    const [form, setForm] = useState<ProductFormState>(emptyForm)
-    const [pieceName, setPieceName] = useState('')
-    const [editState, setEditState] = useState<EditState>({ productId: null, values: emptyForm })
-
-    const [activeTab, setActiveTab] = useState<'products' | 'recipes'>('products')
-    const [recipes, setRecipes] = useState<Recipe[]>([])
-    const [recipesLoading, setRecipesLoading] = useState(false)
-    const [recipesError, setRecipesError] = useState('')
-    const [isRecipeBuilderOpen, setIsRecipeBuilderOpen] = useState(false)
-    const [editingRecipe, setEditingRecipe] = useState<RecipeDetails | null>(null)
-    const [recipeBuilderError, setRecipeBuilderError] = useState('')
-
     const { t } = useTranslation()
     usePageTitle(t('home.pageTitle', 'My Collection'))
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const response = await apiClient.get('/products')
-                setProducts(response.data || [])
-            } catch {
-                setError(t('products.errorLoad'))
-            } finally {
-                setLoading(false)
-            }
+    const {
+        state: {
+            products,
+            loading,
+            error,
+            form,
+            pieceName,
+            editState,
+            activeTab,
+            recipes,
+            recipesLoading,
+            recipesError,
+            isRecipeBuilderOpen,
+            editingRecipe,
+            recipeBuilderError
+        },
+        actions: {
+            setForm,
+            setPieceName,
+            setEditState,
+            setActiveTab,
+            handleProductSubmit,
+            handleDeleteProduct,
+            startEditProduct,
+            handleEditProductSubmit,
+            handleCreateRecipe,
+            handleEditRecipe,
+            handleRecipeBuilderClose,
+            fetchRecipes
         }
-
-        fetchProducts()
-    }, [t])
-
-    const fetchRecipes = useCallback(async () => {
-        setRecipesLoading(true)
-        setRecipesError('')
-
-        try {
-            const data = await recipeService.getRecipes()
-            setRecipes(data)
-        } catch {
-            setRecipesError(t('products.errorLoadRecipes', 'Failed to load recipes'))
-        } finally {
-            setRecipesLoading(false)
-        }
-    }, [t])
-
-    useEffect(() => {
-        if (activeTab !== 'recipes') return
-
-        const loadRecipes = async () => {
-            await fetchRecipes()
-        }
-
-        void loadRecipes()
-    }, [activeTab, fetchRecipes])
-
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-        setError('')
-
-        try {
-            const normalizedPieceName = pieceName.trim() || undefined
-            const payload = {
-                name: form.name,
-                calories: Number(form.calories),
-                protein: Number(form.protein),
-                fat: Number(form.fat),
-                carbs: Number(form.carbs),
-                pieceName: normalizedPieceName,
-            }
-
-            const response = await apiClient.post('/products', payload)
-            setProducts((prev) => [response.data, ...prev])
-            setForm(emptyForm)
-            setPieceName('')
-        } catch {
-            setError(t('products.errorCreate'))
-        }
-    }
-
-    const handleDelete = async (productId: number) => {
-        try {
-            await apiClient.delete(`/products/${productId}`)
-            setProducts((prev) => prev.filter((product) => product.id !== productId))
-        } catch {
-            setError(t('products.errorDelete'))
-        }
-    }
-
-    const handleCreateRecipe = () => {
-        setEditingRecipe(null)
-        setRecipeBuilderError('')
-        setIsRecipeBuilderOpen(true)
-    }
-
-    const handleEditRecipe = async (recipeId: string) => {
-        setRecipeBuilderError('')
-
-        try {
-            const recipeData = await recipeService.getRecipe(recipeId)
-            setEditingRecipe(recipeData)
-            setIsRecipeBuilderOpen(true)
-        } catch {
-            setRecipeBuilderError(t('products.errorLoadRecipe', 'Failed to load recipe details'))
-        }
-    }
-
-    const handleRecipeBuilderClose = () => {
-        setIsRecipeBuilderOpen(false)
-        setEditingRecipe(null)
-        setRecipeBuilderError('')
-    }
-
-    const startEdit = (product: Product) => {
-        setEditState({
-            productId: product.id,
-            values: {
-                name: product.name,
-                calories: String(product.calories ?? ''),
-                protein: String(product.protein ?? ''),
-                fat: String(product.fat ?? ''),
-                carbs: String(product.carbs ?? ''),
-            },
-        })
-    }
-
-    const handleEditSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-        setError('')
-
-        if (!editState.productId) return
-
-        try {
-            const payload = {
-                name: editState.values.name,
-                calories: Number(editState.values.calories),
-                protein: Number(editState.values.protein),
-                fat: Number(editState.values.fat),
-                carbs: Number(editState.values.carbs),
-            }
-
-            const response = await apiClient.put(`/products/${editState.productId}`, payload)
-            setProducts((prev) => prev.map((product) => (product.id === editState.productId ? response.data : product)))
-            setEditState({ productId: null, values: emptyForm })
-        } catch {
-            setError(t('products.errorUpdate'))
-        }
-    }
+    } = useCollection()
 
     return (
         <>
@@ -263,7 +116,7 @@ function Products() {
                                                     <button
                                                         type="button"
                                                         onClick={() => {
-                                                            void handleEditRecipe(recipe.id)
+                                                            void handleEditRecipe(String(recipe.id))
                                                         }}
                                                         className="rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                                                     >
@@ -298,7 +151,7 @@ function Products() {
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <form onSubmit={handleProductSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                             <div className="mb-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-slate-700">{t('products.name')}</label>
@@ -410,13 +263,13 @@ function Products() {
                                                 <h2 className="text-lg font-semibold text-slate-900">{product.name}</h2>
                                                 <div className="flex gap-2">
                                                     <button
-                                                        onClick={() => startEdit(product)}
+                                                        onClick={() => startEditProduct(product)}
                                                         className="rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                                                     >
                                                         {t('products.edit')}
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDelete(product.id)}
+                                                        onClick={() => void handleDeleteProduct(product.id)}
                                                         className="rounded-full border border-red-200 px-3 py-1 text-sm font-medium text-red-600 transition hover:bg-red-50"
                                                     >
                                                         {t('products.delete')}
@@ -425,7 +278,7 @@ function Products() {
                                             </div>
 
                                             {editState.productId === product.id ? (
-                                                <form onSubmit={handleEditSubmit} className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                                                <form onSubmit={handleEditProductSubmit} className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
                                                     <div className="grid gap-2">
                                                         <input
                                                             value={editState.values.name}
@@ -529,9 +382,8 @@ function Products() {
                 onClose={handleRecipeBuilderClose}
                 initialData={editingRecipe ?? undefined}
                 onSaveSuccess={() => {
-                    setEditingRecipe(null)
-                    setRecipeBuilderError('')
-                    fetchRecipes()
+                    handleRecipeBuilderClose();
+                    void fetchRecipes()
                     setActiveTab('recipes')
                 }}
             />
