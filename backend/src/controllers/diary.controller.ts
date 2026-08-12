@@ -10,7 +10,7 @@ export class DiaryController {
     public addEntry = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
             const userId = req.userId as string;
-            const { productId, amount, productData, date } = req.body;
+            const { productId, productData } = req.body;
 
             let finalProductId = productId;
 
@@ -92,7 +92,7 @@ export class DiaryController {
 
             await diaryService.deleteEntry(id, userId);
 
-            res.status(200).json({ message: 'Запись удалена из дневника' });
+            res.status(200).json({ message: 'Data was deleted from diary.' });
         } catch (error) {
             next(error);
         }
