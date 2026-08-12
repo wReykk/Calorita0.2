@@ -1,58 +1,19 @@
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { usePageTitle } from '../hooks/usePageTitle.js'
-import apiClient from '../assets/api/client'
-import WeightChart from '../components/WeightChart.js'
+import { usePageTitle } from '../hooks/usePageTitle'
+import WeightChart from '../components/WeightChart'
 import ActivityStreak from '../components/ActivityStreak'
 import NutritionalStats from '../components/NutritionalStats'
 import WaterStats from '../components/WaterStats'
 import WeightReminder from '../components/WeightReminder'
-
-interface UserChartData {
-    targetWeight?: number | null;
-    currentStreak?: number;
-    longestStreak?: number;
-    weightLogs: {
-        id: string;
-        weight: number;
-        date: string;
-    }[];
-}
-
-interface DashboardStats {
-    weekly: { calories: number; protein: number; fat: number; carbs: number; water: number; };
-    monthly: { calories: number; protein: number; fat: number; carbs: number; water: number; };
-}
+import { useDashboard } from '../hooks/useDashboard'
 
 function Home() {
     const navigate = useNavigate()
     const { t } = useTranslation()
-    const isLoggedIn = Boolean(localStorage.getItem('token'))
     usePageTitle(t('home.pageTitle', 'Home'))
 
-    const [userData, setUserData] = useState<UserChartData | null>(null)
-    const [statsData, setStatsData] = useState<DashboardStats | null>(null)
-    const [isLoadingData, setIsLoadingData] = useState(false)
-
-    useEffect(() => {
-        if (!isLoggedIn) return;
-
-        const fetchUserData = async () => {
-            setIsLoadingData(true)
-            try {
-                const response = await apiClient.get('/users/me')
-                setUserData(response.data.user)
-                setStatsData(response.data.stats)
-            } catch (error) {
-                console.error('Failed to fetch user data for chart:', error)
-            } finally {
-                setIsLoadingData(false)
-            }
-        }
-
-        void fetchUserData()
-    }, [isLoggedIn])
+    const { isLoggedIn, userData, statsData, isLoadingData } = useDashboard()
 
     if (!isLoggedIn) {
         return (
@@ -88,6 +49,7 @@ function Home() {
                 {userData && (
                     <WeightReminder weightLogs={userData.weightLogs || []} />
                 )}
+
                 <div className="mb-2 text-center">
                     <h1 className="text-1xl font-semibold tracking-tight text-gray-900 sm:text-1xl">
                         {t('home.welcomeBackTitle')}

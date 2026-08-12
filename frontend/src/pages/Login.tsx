@@ -1,55 +1,15 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import apiClient from '../assets/api/client'
-import { usePageTitle } from '../hooks/usePageTitle.js'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { useLogin } from '../hooks/useLogin'
 
 function Login() {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
-    const navigate = useNavigate()
     const { t } = useTranslation()
     usePageTitle(t('home.pageTitle', 'Log In'))
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-        setError('')
-
-        try {
-            const response = await apiClient.post('/auth/login', { email, password })
-
-            if (response.data?.token) {
-                localStorage.setItem('token', response.data.token)
-
-                if (response.data?.user?.id) {
-                    localStorage.setItem('userId', response.data.user.id)
-                    localStorage.setItem('user', JSON.stringify(response.data.user))
-                } else {
-                    localStorage.removeItem('userId')
-                    localStorage.removeItem('user')
-                }
-
-                const savedUsername =
-                    response.data?.user?.name ||
-                    response.data?.user?.email ||
-                    response.data?.name ||
-                    response.data?.email ||
-                    response.data?.username ||
-                    ''
-
-                if (savedUsername) {
-                    localStorage.setItem('username', savedUsername)
-                } else {
-                    localStorage.removeItem('username')
-                }
-
-                navigate('/')
-            }
-        } catch {
-            setError(t('login.error'))
-        }
-    }
+    const {
+        state: { email, password, error },
+        actions: { setEmail, setPassword, handleSubmit }
+    } = useLogin()
 
     return (
         <div className="min-h-[80vh] bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
