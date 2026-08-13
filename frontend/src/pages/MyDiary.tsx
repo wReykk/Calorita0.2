@@ -47,11 +47,11 @@ function MyDiary() {
 
     return (
         <div className="space-y-6">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="rounded-3xl border border-slate-200 bg-white px-6 py-4 shadow-sm sm:px-8 sm:py-5">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-semibold text-gray-900">{t('myDiary.title')}</h1>
-                        <p className="text-sm text-gray-600">{t('myDiary.subtitle')}</p>
+                        <h1 className="text-2xl font-semibold leading-none text-gray-900">{t('myDiary.title')}</h1>
+                        <p className="mt-1.5 text-sm text-gray-500">{t('myDiary.subtitle')}</p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
@@ -303,4 +303,4 @@ function MyDiary() {
     )
 }
 
-export default MyDiary  
+export default MyDiary

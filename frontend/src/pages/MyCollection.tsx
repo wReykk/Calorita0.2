@@ -43,25 +43,45 @@ function Products() {
     return (
         <>
             <div className="space-y-6">
-                <div className="flex items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-semibold">{t('products.title')}</h1>
-                        <p className="text-sm text-slate-600">{t('products.subtitle')}</p>
-                        <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-gray-500 mt-5 mb-2">{t('products.tipValue')}</h3>
-                        <p className="text-sm text-slate-600 mb-3">{t('products.tip')}</p>
+                <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                    <div className="mx-auto max-w-3xl text-center">
+                        <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl leading-none">
+                            {t('products.title')}
+                        </h1>
+                        <p className="mt-2.5 text-sm text-gray-500">
+                            {t('products.subtitle')}
+                        </p>
+
+                        <div className="mx-auto mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-left">
+                            <h3 className="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 text-center">
+                                {t('products.tipValue', 'TIP')}
+                            </h3>
+                            <p className="text-sm leading-relaxed text-slate-600 text-center">
+                                {t('products.tip')}
+                            </p>
+                        </div>
                     </div>
-                    <div className="flex w-full flex-col gap-3 sm:w-auto">
+                </div>
+
+                <div className="flex justify-center">
+                    <div className="flex w-full rounded-full bg-slate-200/60 p-1 sm:w-auto">
                         <button
                             type="button"
                             onClick={() => setActiveTab('products')}
-                            className={`w-full rounded-3xl px-5 py-3 text-sm font-semibold transition ${activeTab === 'products' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                            className={`flex-1 rounded-full px-8 py-2.5 text-sm font-semibold transition sm:flex-none ${activeTab === 'products'
+                                ? 'bg-white text-slate-900 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/50'
+                                }`}
                         >
                             {t('products.myProducts', 'My Products')}
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('recipes')}
-                            className={`w-full rounded-3xl px-5 py-3 text-sm font-semibold transition ${activeTab === 'recipes' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                            className={`flex-1 rounded-full px-8 py-2.5 text-sm font-semibold transition sm:flex-none ${activeTab === 'recipes'
+                                ? 'bg-white text-slate-900 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/50'
+                                }`}
                         >
                             {t('products.myRecipes', 'My Recipes')}
                         </button>
@@ -70,15 +90,11 @@ function Products() {
 
                 {activeTab === 'recipes' ? (
                     <div className="space-y-4">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                                <h2 className="text-lg font-semibold text-slate-900">{t('products.recipesTitle', 'My Recipes')}</h2>
-                                <p className="text-sm text-slate-600">{t('products.recipesSubtitle', 'View and manage your saved recipes.')}</p>
-                            </div>
+                        <div className="items-center justify-between gap-3">
                             <button
                                 type="button"
                                 onClick={handleCreateRecipe}
-                                className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
                             >
                                 {t('products.createRecipe', 'Create Recipe')}
                             </button>
@@ -216,17 +232,17 @@ function Products() {
                                 </div>
                             </div>
 
-                            <div className="mt-4 max-w-xl">
-                                <label className="mb-1 block text-sm font-medium text-slate-700">
+                            <div className="mx-auto mt-4 max-w-xl">
+                                <label className="mb-1 block text-center text-sm font-medium text-slate-700">
                                     {t('products.portionTypeLabel', 'Portion type (optional)')}
                                 </label>
                                 <input
                                     value={pieceName}
                                     onChange={(event) => setPieceName(event.target.value)}
-                                    className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-slate-500"
+                                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-center outline-none focus:border-slate-500"
                                     placeholder={t('products.portionTypePlaceholder', 'e.g. 1 bar, 1 serving')}
                                 />
-                                <p className="mt-1 text-xs text-slate-500">
+                                <p className="mt-1 text-center text-xs text-slate-500">
                                     {t('products.portionTypeHelp', 'Leave blank if macros are per 100g.')}
                                 </p>
                             </div>
@@ -290,6 +306,7 @@ function Products() {
                                                             <input
                                                                 type="number"
                                                                 min="0"
+                                                                step="0.1"
                                                                 value={editState.values.calories}
                                                                 onChange={(event) => setEditState((prev) => ({ ...prev, values: { ...prev.values, calories: event.target.value } }))}
                                                                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
