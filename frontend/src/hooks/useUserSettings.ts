@@ -1,6 +1,6 @@
 import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import apiClient from '../assets/api/client'
+import { userService } from '../services/user.service'
 import type { FormState, UserSettingsFormProps } from '../types/userSettings.types'
 import {
     getInitialFormState,
@@ -27,7 +27,6 @@ export const useUserSettings = ({ isOnboarding = false, onSubmitSuccess }: Pick<
         setForm((current) => ({ ...current, [field]: event.target.value as FormState[keyof FormState] }))
     }
 
-    // Автоматическое скрытие уведомлений
     useEffect(() => {
         if (!feedback) return undefined
 
@@ -38,15 +37,14 @@ export const useUserSettings = ({ isOnboarding = false, onSubmitSuccess }: Pick<
         return () => window.clearTimeout(timeoutId)
     }, [feedback])
 
-    // Подгрузка свежих данных
     useEffect(() => {
         const loadLatestUserData = async () => {
             try {
                 const token = localStorage.getItem('token')
                 if (!token) return
 
-                const response = await apiClient.get('/users/me')
-                const user = response.data?.user
+                const data = await userService.getMe()
+                const user = data?.user
 
                 if (user) {
                     const nextFormState = buildFormStateFromUser(user)
@@ -121,9 +119,9 @@ export const useUserSettings = ({ isOnboarding = false, onSubmitSuccess }: Pick<
                 pace: isMaintainGoal ? 'MEDIUM' : form.pace,
             }
 
-            const response = await apiClient.patch(`/users/${userId}/parameters`, payload)
-            const updatedUser = response.data?.user
-            const estimatedWeeksToGoal = response.data?.estimatedWeeksToGoal ?? null
+            const data = await userService.updateParameters(userId, payload)
+            const updatedUser = data?.user
+            const estimatedWeeksToGoal = data?.estimatedWeeksToGoal ?? null
 
             if (updatedUser) {
                 localStorage.setItem('user', JSON.stringify(updatedUser))

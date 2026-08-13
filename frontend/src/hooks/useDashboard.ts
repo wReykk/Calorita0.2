@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import apiClient from '../assets/api/client'
 import type { UserChartData, DashboardStats } from '../types/dashboard.types'
+import { userService } from '../services/user.service'
 
 export const useDashboard = () => {
     const isLoggedIn = Boolean(localStorage.getItem('token'))
@@ -14,9 +14,9 @@ export const useDashboard = () => {
         const fetchUserData = async () => {
             setIsLoadingData(true)
             try {
-                const response = await apiClient.get('/users/me')
-                setUserData(response.data.user)
-                setStatsData(response.data.stats)
+                const data = await userService.getMe()
+                setUserData(data.user)
+                setStatsData(data.stats)
             } catch (error) {
                 console.error('Failed to fetch user data for chart:', error)
             } finally {

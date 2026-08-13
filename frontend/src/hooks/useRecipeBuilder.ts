@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import apiClient from '../assets/api/client'
+import { productService } from '../services/product.service'
 import { type RecipeDetails } from '../types/recipe.types'
 import { recipeService } from '../services/recipe.service'
 import type { ProductOption, Ingredient } from '../types/recipe.types'
@@ -52,11 +52,9 @@ export const useRecipeBuilder = ({ open, onClose, onSaveSuccess, initialData }: 
         const timeoutId = window.setTimeout(() => {
             const fetchSearch = async () => {
                 try {
-                    const response = await apiClient.get('/products/search', {
-                        params: { q: searchQuery.trim(), lang: i18n.language },
-                    })
+                    const data = await productService.searchProducts(searchQuery.trim(), i18n.language)
 
-                    const results = Array.isArray(response.data) ? response.data : []
+                    const results = Array.isArray(data) ? data : []
                     setSearchResults(
                         results.map((product: ProductOption) => ({
                             ...product,

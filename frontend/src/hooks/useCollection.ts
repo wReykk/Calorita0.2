@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import apiClient from '../assets/api/client'
 import { recipeService } from '../services/recipe.service'
 import { type Recipe, type RecipeDetails } from '../types/recipe.types'
 import type { Product, ProductFormState, EditState } from '../types/collection.types'
+import { productService } from '../services/product.service'
 
 export const emptyForm: ProductFormState = {
     name: '',
@@ -34,8 +34,8 @@ export const useCollection = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await apiClient.get('/products')
-                setProducts(response.data || [])
+                const data = await productService.getProducts()
+                setProducts(data || [])
             } catch {
                 setError(t('products.errorLoad'))
             } finally {
@@ -85,8 +85,8 @@ export const useCollection = () => {
                 pieceName: normalizedPieceName,
             }
 
-            const response = await apiClient.post('/products', payload)
-            setProducts((prev) => [response.data, ...prev])
+            const data = await productService.createProduct(payload)
+            setProducts((prev) => [data, ...prev])
             setForm(emptyForm)
             setPieceName('')
         } catch {
@@ -96,7 +96,7 @@ export const useCollection = () => {
 
     const handleDeleteProduct = async (productId: number) => {
         try {
-            await apiClient.delete(`/products/${productId}`)
+            await productService.deleteProduct(productId)
             setProducts((prev) => prev.filter((product) => product.id !== productId))
         } catch {
             setError(t('products.errorDelete'))
@@ -131,8 +131,8 @@ export const useCollection = () => {
                 carbs: Number(editState.values.carbs),
             }
 
-            const response = await apiClient.put(`/products/${editState.productId}`, payload)
-            setProducts((prev) => prev.map((product) => (product.id === editState.productId ? response.data : product)))
+            const data = await productService.updateProduct(editState.productId, payload)
+            setProducts((prev) => prev.map((product) => (product.id === editState.productId ? data : product)))
             setEditState({ productId: null, values: emptyForm })
         } catch {
             setError(t('products.errorUpdate'))

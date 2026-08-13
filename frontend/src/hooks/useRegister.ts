@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import apiClient from '../assets/api/client'
+import { authService } from '../services/auth.service'
 
 export const useRegister = () => {
     const [name, setName] = useState('')
@@ -28,14 +28,12 @@ export const useRegister = () => {
         setSuccessMessage('')
 
         try {
-            const registerResponse = await apiClient.post('/auth/register', { name, email, password })
-            const registerData = registerResponse.data
+            const registerData = await authService.register({ name, email, password })
 
             if (registerData?.token) {
                 persistAuthState(registerData.token, registerData)
             } else {
-                const loginResponse = await apiClient.post('/auth/login', { email, password })
-                const loginData = loginResponse.data
+                const loginData = await authService.login({ email, password })
                 const user = loginData?.user
                 const token = loginData?.token
 

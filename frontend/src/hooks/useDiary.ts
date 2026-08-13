@@ -1,6 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import apiClient from '../assets/api/client'
+import { productService } from '../services/product.service'
+import { diaryService } from '../services/diary.service'
 import { formatDateInput, parseDateInput } from '../utils/diary.utils'
 import type { DiaryEntry, ProductOption, Summary } from '../types/diary.types'
 
@@ -60,11 +61,8 @@ export const useDiary = () => {
 
         const timeoutId = window.setTimeout(async () => {
             try {
-                const response = await apiClient.get('/products/search', {
-                    params: { q: searchQuery.trim(), lang: i18n.language },
-                })
-
-                const results = Array.isArray(response.data) ? response.data : []
+                const data = await productService.searchProducts(searchQuery.trim(), i18n.language)
+                const results = Array.isArray(data) ? data : []
                 setSearchResults(results.map((product: ProductOption) => ({
                     ...product,
                     id: product.id || product.externalId || '',
@@ -85,8 +83,8 @@ export const useDiary = () => {
             setError('')
 
             try {
-                const response = await apiClient.get('/diary')
-                const allEntries = Array.isArray(response.data) ? response.data : []
+                const data = await diaryService.getEntries()
+                const allEntries = Array.isArray(data) ? data : []
                 const filteredEntries = allEntries.filter((entry: DiaryEntry) => {
                     const entryDate = entry.date ? entry.date.split('T')[0] : ''
                     return entryDate === selectedDate
@@ -168,7 +166,7 @@ export const useDiary = () => {
         setSubmitting(true)
 
         try {
-            const response = await apiClient.post('/diary', {
+            const data = await diaryService.createEntry({
                 productId,
                 amount: Number(weight),
                 date: new Date(`${selectedDate}T12:00:00`).toISOString(),
@@ -184,7 +182,7 @@ export const useDiary = () => {
                 } : undefined
             })
 
-            setEntries((prev) => [response.data, ...prev])
+            setEntries((prev) => [data, ...prev])
             setWeight('')
             setSearchQuery('')
             setProductId('')
@@ -198,7 +196,7 @@ export const useDiary = () => {
 
     const handleDelete = async (entryId: string) => {
         try {
-            await apiClient.delete(`/diary/${entryId}`)
+            await diaryService.deleteEntry(entryId)
             setEntries((prev) => prev.filter((entry) => entry.id !== entryId))
         } catch {
             setError(t('myDiary.errorDeleteEntry'))
@@ -214,10 +212,8 @@ export const useDiary = () => {
         if (!editingWeight) return
 
         try {
-            const response = await apiClient.put(`/diary/${entryId}`, {
-                amount: Number(editingWeight),
-            })
-            setEntries((prev) => prev.map((entry) => (entry.id === entryId ? { ...entry, ...response.data } : entry)))
+            const data = await diaryService.updateEntry(entryId, { amount: Number(editingWeight) })
+            setEntries((prev) => prev.map((entry) => (entry.id === entryId ? { ...entry, ...data } : entry)))
             setEditingEntryId(null)
             setEditingWeight('')
         } catch {

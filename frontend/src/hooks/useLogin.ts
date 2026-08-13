@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import apiClient from '../assets/api/client'
+import { authService } from '../services/auth.service'
 
 export const useLogin = () => {
     const [email, setEmail] = useState('')
@@ -16,25 +16,25 @@ export const useLogin = () => {
         setError('')
 
         try {
-            const response = await apiClient.post('/auth/login', { email, password })
+            const data = await authService.login({ email, password })
 
-            if (response.data?.token) {
-                localStorage.setItem('token', response.data.token)
+            if (data?.token) {
+                localStorage.setItem('token', data.token)
 
-                if (response.data?.user?.id) {
-                    localStorage.setItem('userId', response.data.user.id)
-                    localStorage.setItem('user', JSON.stringify(response.data.user))
+                if (data?.user?.id) {
+                    localStorage.setItem('userId', data.user.id)
+                    localStorage.setItem('user', JSON.stringify(data.user))
                 } else {
                     localStorage.removeItem('userId')
                     localStorage.removeItem('user')
                 }
 
                 const savedUsername =
-                    response.data?.user?.name ||
-                    response.data?.user?.email ||
-                    response.data?.name ||
-                    response.data?.email ||
-                    response.data?.username ||
+                    data?.user?.name ||
+                    data?.user?.email ||
+                    data?.name ||
+                    data?.email ||
+                    data?.username ||
                     ''
 
                 if (savedUsername) {
