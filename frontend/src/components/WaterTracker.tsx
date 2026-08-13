@@ -1,75 +1,33 @@
-import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import apiClient from '../assets/api/client';
+import { useTranslation } from 'react-i18next'
+import { useWaterTracker } from '../hooks/useWaterTracker'
 
 interface WaterTrackerProps {
     selectedDate?: Date | string;
 }
 
 export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
-    const { t } = useTranslation();
-    const [waterTotal, setWaterTotal] = useState<number>(0);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+    const { t } = useTranslation()
 
-    const activeDate = selectedDate ? new Date(selectedDate).toISOString() : new Date().toISOString();
-
-    const DAILY_GOAL = 2000;
-    const progressPercentage = Math.min((waterTotal / DAILY_GOAL) * 100, 100);
-
-    useEffect(() => {
-        const fetchWater = async () => {
-            try {
-                const response = await apiClient.get(`/water/today?date=${activeDate}`);
-                setWaterTotal(response.data.total);
-            } catch (error) {
-                console.error('Failed to fetch water:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        void fetchWater();
-    }, [activeDate]);
-
-    const handleAddWater = async (amount: number) => {
-        if (isProcessing) return;
-        setIsProcessing(true);
-
-        try {
-            setWaterTotal(prev => prev + amount);
-            await apiClient.post('/water', { amount, date: activeDate });
-        } catch (error) {
-            console.error('Failed to add water:', error);
-            setWaterTotal(prev => prev - amount);
-        } finally {
-            setIsProcessing(false);
+    const {
+        state: {
+            waterTotal,
+            isLoading,
+            isProcessing,
+            progressPercentage,
+            DAILY_GOAL
+        },
+        actions: {
+            handleAddWater,
+            handleRemoveWater
         }
-    };
-
-    const handleRemoveWater = async (amount: number) => {
-        if (isProcessing || waterTotal === 0) return;
-        setIsProcessing(true);
-
-        const amountToRemove = Math.min(amount, waterTotal);
-
-        try {
-            setWaterTotal(prev => prev - amountToRemove);
-            await apiClient.delete(`/water/${amountToRemove}?date=${activeDate}`);
-        } catch (error) {
-            console.error('Failed to remove water:', error);
-            setWaterTotal(prev => prev + amountToRemove);
-        } finally {
-            setIsProcessing(false);
-        }
-    };
+    } = useWaterTracker({ selectedDate })
 
     if (isLoading) {
         return (
             <div className="flex h-full w-full min-h-62.5 items-center justify-center rounded-3xl border border-slate-200 bg-white shadow-sm">
                 <p className="text-sm text-slate-500">{t('common.loading', 'Loading...')}</p>
             </div>
-        );
+        )
     }
 
     return (
@@ -104,9 +62,7 @@ export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
                 </div>
             </div>
 
-            {/* Сетка кнопок (добавление и удаление) */}
             <div className="grid grid-cols-3 gap-3">
-                {/* Ряд добавления */}
                 <button
                     onClick={() => handleAddWater(250)}
                     disabled={isProcessing}
@@ -155,5 +111,5 @@ export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
                 </button>
             </div>
         </div>
-    );
+    )
 }
