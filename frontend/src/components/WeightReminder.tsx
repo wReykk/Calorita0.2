@@ -10,7 +10,7 @@ export default function WeightReminder({ weightLogs }: WeightReminderProps) {
     const navigate = useNavigate();
 
     const checkNeedsUpdate = () => {
-        if (!weightLogs || weightLogs.length === 0) return true;
+        if (!weightLogs || weightLogs.length === 0) return false;
 
         const latestLog = weightLogs.reduce((latest, current) => {
             return new Date(current.date) > new Date(latest.date) ? current : latest;

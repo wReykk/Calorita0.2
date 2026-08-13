@@ -96,11 +96,12 @@ function Layout() {
 
       <main className="mx-auto max-w-6xl px-4 py-10">
         <Routes>
-          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/onboarding" element={<Onboarding />} />
+
           <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/products" element={<Products />} />
             <Route path="/diary" element={<MyDiary />} />
             <Route path="/profile" element={<UserProfile />} />
