@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 interface WaterStatsProps {
     weeklyAverage?: number;
-    monthlyAverage?: number; // Можно даже удалить этот пропс, если он больше нигде не нужен
+    monthlyAverage?: number;
 }
 
 export default function WaterStats({ weeklyAverage = 0 }: WaterStatsProps) {

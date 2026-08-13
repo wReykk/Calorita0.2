@@ -1,26 +1,13 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-
-// Вспомогательная функция для получения начала и конца нужного дня
-const getDayBounds = (dateParam?: string) => {
-    const date = dateParam ? new Date(dateParam) : new Date();
-    date.setHours(0, 0, 0, 0); // Начало дня
-
-    const tomorrow = new Date(date);
-    tomorrow.setDate(tomorrow.getDate() + 1); // Начало следующего дня
-
-    return { date, tomorrow };
-};
+import { prisma } from '../prisma/prisma.config.js';
+import { getDayBounds } from '../utils/date.js';
 
 export const getTodayWaterIntake = async (userId: string, dateParam?: string) => {
-    const { date, tomorrow } = getDayBounds(dateParam);
-
+    const { startOfDay, tomorrow } = getDayBounds(dateParam);
     const logs = await prisma.waterLog.findMany({
         where: {
             userId,
             date: {
-                gte: date,
+                gte: startOfDay,
                 lt: tomorrow
             }
         }
@@ -32,9 +19,11 @@ export const getTodayWaterIntake = async (userId: string, dateParam?: string) =>
 export const addWaterLog = async (userId: string, amount: number, dateParam?: string) => {
     if (!amount || amount <= 0) throw new Error('INVALID_AMOUNT');
 
-    // Если добавляем воду в прошлый день, ставим время на 12:00 этого дня
     const logDate = dateParam ? new Date(dateParam) : new Date();
-    if (dateParam) logDate.setHours(12, 0, 0, 0);
+
+    if (dateParam) {
+        logDate.setUTCHours(12, 0, 0, 0);
+    }
 
     return await prisma.waterLog.create({
         data: { userId, amount: Number(amount), date: logDate }
@@ -48,7 +37,10 @@ export const removeWaterLog = async (userId: string, amount: number, dateParam?:
     if (currentTotal < amount) throw new Error('NOT_ENOUGH_WATER_TO_REMOVE');
 
     const logDate = dateParam ? new Date(dateParam) : new Date();
-    if (dateParam) logDate.setHours(12, 0, 0, 0);
+
+    if (dateParam) {
+        logDate.setUTCHours(12, 0, 0, 0);
+    }
 
     return await prisma.waterLog.create({
         data: { userId, amount: -Number(amount), date: logDate }

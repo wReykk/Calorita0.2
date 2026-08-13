@@ -1,22 +1,18 @@
-import { Router } from 'express';
-import { ProductController } from '../controllers/product.controller.js';
+import { Router, type RequestHandler } from 'express';
+import * as productController from '../controllers/product.controller.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import { createProductSchema, updateProductSchema } from '../schemas/product.schema.js';
 
 const router = Router();
-const controller = new ProductController();
 
-router.use(authenticate);
+router.use(authenticate as RequestHandler);
 
-router.get('/search', controller.searchProducts);
-
-router.get('/', controller.getProducts);
-router.get('/:id', controller.getProductById);
-
-router.post('/', validate(createProductSchema), controller.createProduct);
-router.put('/:id', validate(updateProductSchema), controller.updateProduct);
-
-router.delete('/:id', controller.deleteProduct);
+router.get('/search', productController.searchProducts as RequestHandler);
+router.get('/', productController.getProducts as RequestHandler);
+router.get('/:id', productController.getProductById as RequestHandler);
+router.post('/', validate(createProductSchema), productController.createProduct as RequestHandler);
+router.put('/:id', validate(updateProductSchema), productController.updateProduct as RequestHandler);
+router.delete('/:id', productController.deleteProduct as RequestHandler);
 
 export default router;

@@ -1,16 +1,15 @@
 import * as deepl from 'deepl-node';
 
-const authKey = process.env.DEEPL_AUTH_KEY || '';
-const translator = new deepl.Translator(authKey);
+const authKey = process.env.DEEPL_AUTH_KEY;
+const translator = authKey ? new deepl.Translator(authKey) : null;
 
 export const translateText = async (
     text: string | string[],
     targetLang: deepl.TargetLanguageCode
 ): Promise<string | string[]> => {
     try {
-        if (!authKey) return text; // Если ключа нет, возвращаем как есть, чтобы не ломать приложение
+        if (!translator) return text;
 
-        // null означает, что DeepL сам автоопределит язык оригинала
         const result = await translator.translateText(text, null, targetLang);
 
         if (Array.isArray(result)) {

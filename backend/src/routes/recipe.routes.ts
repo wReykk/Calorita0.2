@@ -1,14 +1,14 @@
-import { Router } from 'express';
-import { RecipeController } from '../controllers/recipe.controller.js';
+import { Router, type RequestHandler } from 'express';
+import * as recipeController from '../controllers/recipe.controller.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
 
 const router = Router();
-const recipeController = new RecipeController();
+router.use(authenticate as RequestHandler);
 
-router.post('/', authenticate, recipeController.createRecipe.bind(recipeController));
-router.get('/', authenticate, recipeController.getUserRecipes.bind(recipeController));
-router.get('/:id', authenticate, recipeController.getRecipeById.bind(recipeController));
-router.put('/:id', authenticate, recipeController.updateRecipe.bind(recipeController));
-router.delete('/:id', authenticate, recipeController.deleteRecipe.bind(recipeController));
+router.post('/', recipeController.createRecipe.bind(recipeController) as RequestHandler);
+router.get('/', recipeController.getUserRecipes.bind(recipeController) as RequestHandler);
+router.get('/:id', recipeController.getRecipeById.bind(recipeController) as RequestHandler);
+router.put('/:id', recipeController.updateRecipe.bind(recipeController) as RequestHandler);
+router.delete('/:id', recipeController.deleteRecipe.bind(recipeController) as RequestHandler);
 
 export default router;

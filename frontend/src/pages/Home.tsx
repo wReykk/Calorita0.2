@@ -1,62 +1,23 @@
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { usePageTitle } from '../hooks/usePageTitle.js'
-import apiClient from '../assets/api/client'
-import WeightChart from '../components/WeightChart.js'
+import { usePageTitle } from '../hooks/usePageTitle'
+import WeightChart from '../components/WeightChart'
 import ActivityStreak from '../components/ActivityStreak'
 import NutritionalStats from '../components/NutritionalStats'
 import WaterStats from '../components/WaterStats'
 import WeightReminder from '../components/WeightReminder'
-
-interface UserChartData {
-    targetWeight?: number | null;
-    currentStreak?: number;
-    longestStreak?: number;
-    weightLogs: {
-        id: string;
-        weight: number;
-        date: string;
-    }[];
-}
-
-interface DashboardStats {
-    weekly: { calories: number; protein: number; fat: number; carbs: number; water: number; };
-    monthly: { calories: number; protein: number; fat: number; carbs: number; water: number; };
-}
+import { useDashboard } from '../hooks/useDashboard'
 
 function Home() {
     const navigate = useNavigate()
     const { t } = useTranslation()
-    const isLoggedIn = Boolean(localStorage.getItem('token'))
     usePageTitle(t('home.pageTitle', 'Home'))
 
-    const [userData, setUserData] = useState<UserChartData | null>(null)
-    const [statsData, setStatsData] = useState<DashboardStats | null>(null)
-    const [isLoadingData, setIsLoadingData] = useState(false)
-
-    useEffect(() => {
-        if (!isLoggedIn) return;
-
-        const fetchUserData = async () => {
-            setIsLoadingData(true)
-            try {
-                const response = await apiClient.get('/users/me')
-                setUserData(response.data.user)
-                setStatsData(response.data.stats)
-            } catch (error) {
-                console.error('Failed to fetch user data for chart:', error)
-            } finally {
-                setIsLoadingData(false)
-            }
-        }
-
-        void fetchUserData()
-    }, [isLoggedIn])
+    const { isLoggedIn, userData, statsData, isLoadingData } = useDashboard()
 
     if (!isLoggedIn) {
         return (
-            <div className="min-h-[80vh] bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
+            <div className="min-h-[80vh] px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mx-auto flex max-w-5xl items-center justify-center">
                     <div className="w-full max-w-3xl rounded-3xl border border-gray-200 bg-white p-10 shadow-sm sm:p-14">
                         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gray-500">Calorita</p>
@@ -82,76 +43,110 @@ function Home() {
     }
 
     return (
-        <div className="min-h-[80vh] bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-5xl">
+        <div className="min-h-[80vh] px-4 pb-10 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-5xl flex flex-col gap-6 sm:gap-8">
 
                 {userData && (
                     <WeightReminder weightLogs={userData.weightLogs || []} />
                 )}
-                {/* --- Максимально сжатые отступы шапки --- */}
-                <div className="mb-2 text-center">
-                    {/* <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-500">
-                        {t('home.welcomeBackSubtitle')}
-                    </p> */}
-                    <h1 className="text-1xl font-semibold tracking-tight text-gray-900 sm:text-1xl">
+
+                <div className="flex flex-col items-center justify-center rounded-3xl border border-gray-200 bg-white px-6 pt pb-5 text-center shadow-sm sm:px-8 sm:pt-4 sm:pb-6">
+                    <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl leading-none">
                         {t('home.welcomeBackTitle')}
                     </h1>
-                    <p className="mx-auto max-w-4xl text-sm leading-6 text-gray-600 text-center">
+                    <p className="mt-2.5 max-w-2xl text-sm text-gray-500">
                         {t('home.welcomeBackDescription')}
                     </p>
                 </div>
 
-                {/* --- Убрали lg:items-start, чтобы колонки тянулись одинаково --- */}
-                <div className="mt-6 grid gap-6 md:grid-cols-2">
-                    {/* ЛЕВАЯ КОЛОНКА */}
+                <div className="relative py-2">
+                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div className="relative flex justify-center">
+                        <span className="bg-slate-50 px-4 text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">
+                            {t('home.dividerActions', 'QUICK ACTIONS')}
+                        </span>
+                    </div>
+                </div>
+
+                <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/diary')}
+                        className="rounded-3xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    >
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">{t('home.diaryLabel', 'DIARY')}</p>
+                        <h2 className="mt-2 text-xl font-bold text-gray-900">{t('home.diaryCardTitle', 'Open My Diary')}</h2>
+                        <p className="mt-2 text-sm leading-6 text-gray-600">
+                            {t('home.diaryCardDescription', 'Review your daily entries and keep an eye on your nutrition totals.')}
+                        </p>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => navigate('/products')}
+                        className="rounded-3xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    >
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">{t('home.productsLabel', 'PRODUCTS')}</p>
+                        <h2 className="mt-2 text-xl font-bold text-gray-900">{t('home.productsCardTitle', 'Manage My Collection')}</h2>
+                        <p className="mt-2 text-sm leading-6 text-gray-600">
+                            {t('home.productsCardDescription', 'Add new foods to the database so they’re available when you log your meals.')}
+                        </p>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => navigate('/profile')}
+                        className="rounded-3xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    >
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">{t('home.profileLabel', 'SETTINGS')}</p>
+                        <h2 className="mt-2 text-xl font-bold text-gray-900">{t('home.profileCardTitle', 'User Profile')}</h2>
+                        <p className="mt-2 text-sm leading-6 text-gray-600">
+                            {t('home.profileCardDescription', 'Update your weight, goals, and personal preferences.')}
+                        </p>
+                    </button>
+
+                    <div className="flex cursor-default flex-col justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-6 text-left opacity-80 transition hover:opacity-100">
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-400">{t('home.soonLabel', 'COMING SOON')}</p>
+                        <h2 className="mt-2 text-xl font-bold text-gray-400">{t('home.soonCardTitle', 'New Feature')}</h2>
+                        <p className="mt-2 text-sm leading-6 text-gray-400">
+                            {t('home.soonCardDescription', 'We are working on something awesome. Stay tuned!')}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="relative mt-2 py-2">
+                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div className="relative flex justify-center">
+                        <span className="bg-slate-50 px-4 text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">
+                            {t('home.dividerWidgets', 'DASHBOARD WIDGETS')}
+                        </span>
+                    </div>
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-2">
+                    <div className="flex min-w-0 flex-col gap-6">
+                        <NutritionalStats stats={statsData} />
+                    </div>
+
                     <div className="flex min-w-0 flex-col gap-6">
                         <ActivityStreak
                             currentStreak={userData?.currentStreak}
                             longestStreak={userData?.longestStreak}
                         />
-
-                        <button
-                            type="button"
-                            onClick={() => navigate('/diary')}
-                            className="rounded-3xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                        >
-                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">{t('home.diaryLabel')}</p>
-                            <h2 className="mt-2 text-xl font-semibold text-gray-900">{t('home.diaryCardTitle')}</h2>
-                            <p className="mt-2 text-sm leading-6 text-gray-600">
-                                {t('home.diaryCardDescription')}
-                            </p>
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => navigate('/products')}
-                            className="rounded-3xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                        >
-                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">{t('home.productsLabel')}</p>
-                            <h2 className="mt-2 text-xl font-semibold text-gray-900">{t('home.productsCardTitle')}</h2>
-                            <p className="mt-2 text-sm leading-6 text-gray-600">
-                                {t('home.productsCardDescription')}
-                            </p>
-                        </button>
-                    </div>
-
-                    {/* ПРАВАЯ КОЛОНКА */}
-                    <div className="flex min-w-0 flex-col gap-6">
-                        <NutritionalStats stats={statsData} />
-
-                        {/* Обернули WaterStats в flex-1, чтобы он заполнял всю оставшуюся высоту */}
                         {statsData && (
-                            <div className="flex-1">
-                                <WaterStats
-                                    weeklyAverage={statsData.weekly.water}
-                                    monthlyAverage={statsData.monthly.water}
-                                />
-                            </div>
+                            <WaterStats
+                                weeklyAverage={statsData.weekly.water}
+                                monthlyAverage={statsData.monthly.water}
+                            />
                         )}
                     </div>
                 </div>
 
-                <div className="mt-8">
+                <div>
                     {isLoadingData ? (
                         <div className="flex h-72 w-full items-center justify-center rounded-3xl border border-gray-200 bg-white shadow-sm">
                             <p className="text-sm text-gray-500">{t('common.loading', 'Loading...')}</p>
@@ -163,6 +158,7 @@ function Home() {
                         />
                     )}
                 </div>
+
             </div>
         </div>
     )

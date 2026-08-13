@@ -26,13 +26,9 @@ export default function WeightChart({ logs, targetWeight }: WeightChartProps) {
         );
     }
 
-    // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-    // Группируем логи по дням. Если за один день было 5 изменений, останется только последнее.
     const chartData = Object.values(
         logs.reduce((acc, log) => {
             const dateKey = format(new Date(log.date), 'MMM dd');
-            // Перезаписываем данные по ключу даты. Т.к. данные отсортированы по возрастанию (asc),
-            // в итоге останется хронологически последняя запись за этот день.
             acc[dateKey] = {
                 ...log,
                 formattedDate: dateKey
@@ -40,7 +36,6 @@ export default function WeightChart({ logs, targetWeight }: WeightChartProps) {
             return acc;
         }, {} as Record<string, WeightLog & { formattedDate: string }>)
     );
-    // -------------------------
 
     const minWeight = Math.min(...chartData.map(l => l.weight), targetWeight || Infinity);
     const maxWeight = Math.max(...chartData.map(l => l.weight), targetWeight || -Infinity);

@@ -1,237 +1,100 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import apiClient from '../assets/api/client'
+import { usePageTitle } from '../hooks/usePageTitle'
 import RecipeBuilder from '../components/RecipeBuilder'
-import { recipeService, type Recipe, type RecipeDetails } from '../services/recipe.service'
-import { usePageTitle } from '../hooks/usePageTitle' // убрал .js, в TS обычно без расширения
-
-type Product = {
-    id: number
-    name: string
-    calories?: number | null
-    protein?: number | null
-    fat?: number | null
-    carbs?: number | null
-    description?: string | null
-}
-
-type ProductFormState = {
-    name: string
-    calories: string
-    protein: string
-    fat: string
-    carbs: string
-}
-
-type EditState = {
-    productId: number | null
-    values: ProductFormState
-}
-
-const emptyForm = {
-    name: '',
-    calories: '',
-    protein: '',
-    fat: '',
-    carbs: '',
-}
+import { useCollection, emptyForm } from '../hooks/useCollection'
+import type { Recipe } from '../types/recipe.types'
 
 function Products() {
-    const [products, setProducts] = useState<Product[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
-    const [form, setForm] = useState<ProductFormState>(emptyForm)
-    const [pieceName, setPieceName] = useState('')
-    const [editState, setEditState] = useState<EditState>({ productId: null, values: emptyForm })
-
-    // Состояния для рецептов
-    const [activeTab, setActiveTab] = useState<'products' | 'recipes'>('products')
-    const [recipes, setRecipes] = useState<Recipe[]>([])
-    const [recipesLoading, setRecipesLoading] = useState(false)
-    const [recipesError, setRecipesError] = useState('')
-    const [isRecipeBuilderOpen, setIsRecipeBuilderOpen] = useState(false)
-    const [editingRecipe, setEditingRecipe] = useState<RecipeDetails | null>(null)
-    const [recipeBuilderError, setRecipeBuilderError] = useState('')
-
     const { t } = useTranslation()
     usePageTitle(t('home.pageTitle', 'My Collection'))
 
-    // Загрузка продуктов
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const response = await apiClient.get('/products')
-                setProducts(response.data || [])
-            } catch {
-                setError(t('products.errorLoad'))
-            } finally {
-                setLoading(false)
-            }
+    const {
+        state: {
+            products,
+            loading,
+            error,
+            form,
+            pieceName,
+            editState,
+            activeTab,
+            recipes,
+            recipesLoading,
+            recipesError,
+            isRecipeBuilderOpen,
+            editingRecipe,
+            recipeBuilderError
+        },
+        actions: {
+            setForm,
+            setPieceName,
+            setEditState,
+            setActiveTab,
+            handleProductSubmit,
+            handleDeleteProduct,
+            startEditProduct,
+            handleEditProductSubmit,
+            handleCreateRecipe,
+            handleEditRecipe,
+            handleRecipeBuilderClose,
+            fetchRecipes
         }
-
-        fetchProducts()
-    }, [t])
-
-    // Загрузка рецептов при переключении вкладки
-    const fetchRecipes = useCallback(async () => {
-        setRecipesLoading(true)
-        setRecipesError('')
-
-        try {
-            const data = await recipeService.getRecipes()
-            setRecipes(data)
-        } catch {
-            setRecipesError(t('products.errorLoadRecipes', 'Failed to load recipes'))
-        } finally {
-            setRecipesLoading(false)
-        }
-    }, [t])
-
-    useEffect(() => {
-        if (activeTab !== 'recipes') return
-
-        const loadRecipes = async () => {
-            await fetchRecipes()
-        }
-
-        void loadRecipes()
-    }, [activeTab, fetchRecipes])
-
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-        setError('')
-
-        try {
-            const normalizedPieceName = pieceName.trim() || undefined
-            const payload = {
-                name: form.name,
-                calories: Number(form.calories),
-                protein: Number(form.protein),
-                fat: Number(form.fat),
-                carbs: Number(form.carbs),
-                pieceName: normalizedPieceName,
-            }
-
-            const response = await apiClient.post('/products', payload)
-            setProducts((prev) => [response.data, ...prev])
-            setForm(emptyForm)
-            setPieceName('')
-        } catch {
-            setError(t('products.errorCreate'))
-        }
-    }
-
-    const handleDelete = async (productId: number) => {
-        try {
-            await apiClient.delete(`/products/${productId}`)
-            setProducts((prev) => prev.filter((product) => product.id !== productId))
-        } catch {
-            setError(t('products.errorDelete'))
-        }
-    }
-
-    const handleCreateRecipe = () => {
-        setEditingRecipe(null)
-        setRecipeBuilderError('')
-        setIsRecipeBuilderOpen(true)
-    }
-
-    const handleEditRecipe = async (recipeId: string) => {
-        setRecipeBuilderError('')
-
-        try {
-            const recipeData = await recipeService.getRecipe(recipeId)
-            setEditingRecipe(recipeData)
-            setIsRecipeBuilderOpen(true)
-        } catch {
-            setRecipeBuilderError(t('products.errorLoadRecipe', 'Failed to load recipe details'))
-        }
-    }
-
-    const handleRecipeBuilderClose = () => {
-        setIsRecipeBuilderOpen(false)
-        setEditingRecipe(null)
-        setRecipeBuilderError('')
-    }
-
-    const startEdit = (product: Product) => {
-        setEditState({
-            productId: product.id,
-            values: {
-                name: product.name,
-                calories: String(product.calories ?? ''),
-                protein: String(product.protein ?? ''),
-                fat: String(product.fat ?? ''),
-                carbs: String(product.carbs ?? ''),
-            },
-        })
-    }
-
-    const handleEditSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-        setError('')
-
-        if (!editState.productId) return
-
-        try {
-            const payload = {
-                name: editState.values.name,
-                calories: Number(editState.values.calories),
-                protein: Number(editState.values.protein),
-                fat: Number(editState.values.fat),
-                carbs: Number(editState.values.carbs),
-            }
-
-            const response = await apiClient.put(`/products/${editState.productId}`, payload)
-            setProducts((prev) => prev.map((product) => (product.id === editState.productId ? response.data : product)))
-            setEditState({ productId: null, values: emptyForm })
-        } catch {
-            setError(t('products.errorUpdate'))
-        }
-    }
+    } = useCollection()
 
     return (
         <>
             <div className="space-y-6">
-                {/* HEADER AND TABS */}
-                <div className="flex items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-semibold">{t('products.title')}</h1>
-                        <p className="text-sm text-slate-600">{t('products.subtitle')}</p>
-                        <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-gray-500 mt-5 mb-2">{t('products.tipValue')}</h3>
-                        <p className="text-sm text-slate-600 mb-3">{t('products.tip')}</p>
+                <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                    <div className="mx-auto max-w-3xl text-center">
+                        <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl leading-none">
+                            {t('products.title')}
+                        </h1>
+                        <p className="mt-2.5 text-sm text-gray-500">
+                            {t('products.subtitle')}
+                        </p>
+
+                        <div className="mx-auto mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-left">
+                            <h3 className="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 text-center">
+                                {t('products.tipValue', 'TIP')}
+                            </h3>
+                            <p className="text-sm leading-relaxed text-slate-600 text-center">
+                                {t('products.tip')}
+                            </p>
+                        </div>
                     </div>
-                    <div className="flex w-full flex-col gap-3 sm:w-auto">
+                </div>
+
+                <div className="flex justify-center">
+                    <div className="flex w-full rounded-full bg-slate-200/60 p-1 sm:w-auto">
                         <button
                             type="button"
                             onClick={() => setActiveTab('products')}
-                            className={`w-full rounded-3xl px-5 py-3 text-sm font-semibold transition ${activeTab === 'products' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                            className={`flex-1 rounded-full px-8 py-2.5 text-sm font-semibold transition sm:flex-none ${activeTab === 'products'
+                                ? 'bg-white text-slate-900 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/50'
+                                }`}
                         >
                             {t('products.myProducts', 'My Products')}
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('recipes')}
-                            className={`w-full rounded-3xl px-5 py-3 text-sm font-semibold transition ${activeTab === 'recipes' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                            className={`flex-1 rounded-full px-8 py-2.5 text-sm font-semibold transition sm:flex-none ${activeTab === 'recipes'
+                                ? 'bg-white text-slate-900 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/50'
+                                }`}
                         >
                             {t('products.myRecipes', 'My Recipes')}
                         </button>
                     </div>
                 </div>
 
-                {/* TAB CONTENT */}
                 {activeTab === 'recipes' ? (
-                    // RECIPES TAB
                     <div className="space-y-4">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                                <h2 className="text-lg font-semibold text-slate-900">{t('products.recipesTitle', 'My Recipes')}</h2>
-                                <p className="text-sm text-slate-600">{t('products.recipesSubtitle', 'View and manage your saved recipes.')}</p>
-                            </div>
+                        <div className="items-center justify-between gap-3">
                             <button
                                 type="button"
                                 onClick={handleCreateRecipe}
-                                className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
                             >
                                 {t('products.createRecipe', 'Create Recipe')}
                             </button>
@@ -269,7 +132,7 @@ function Products() {
                                                     <button
                                                         type="button"
                                                         onClick={() => {
-                                                            void handleEditRecipe(recipe.id)
+                                                            void handleEditRecipe(String(recipe.id))
                                                         }}
                                                         className="rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                                                     >
@@ -277,7 +140,6 @@ function Products() {
                                                     </button>
                                                 </div>
 
-                                                {/* Вывод макросов для рецепта на 100г */}
                                                 <div className="grid grid-cols-2 gap-2 text-sm text-slate-600 mt-2">
                                                     <div className="rounded-lg bg-slate-50 p-2">
                                                         <p className="text-xs uppercase tracking-wide text-slate-400">{t('products.calories')}</p>
@@ -304,9 +166,8 @@ function Products() {
                         </div>
                     </div>
                 ) : (
-                    // PRODUCTS TAB
                     <div className="space-y-6">
-                        <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <form onSubmit={handleProductSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                             <div className="mb-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-slate-700">{t('products.name')}</label>
@@ -371,17 +232,17 @@ function Products() {
                                 </div>
                             </div>
 
-                            <div className="mt-4 max-w-xl">
-                                <label className="mb-1 block text-sm font-medium text-slate-700">
+                            <div className="mx-auto mt-4 max-w-xl">
+                                <label className="mb-1 block text-center text-sm font-medium text-slate-700">
                                     {t('products.portionTypeLabel', 'Portion type (optional)')}
                                 </label>
                                 <input
                                     value={pieceName}
                                     onChange={(event) => setPieceName(event.target.value)}
-                                    className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-slate-500"
+                                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-center outline-none focus:border-slate-500"
                                     placeholder={t('products.portionTypePlaceholder', 'e.g. 1 bar, 1 serving')}
                                 />
-                                <p className="mt-1 text-xs text-slate-500">
+                                <p className="mt-1 text-center text-xs text-slate-500">
                                     {t('products.portionTypeHelp', 'Leave blank if macros are per 100g.')}
                                 </p>
                             </div>
@@ -418,13 +279,13 @@ function Products() {
                                                 <h2 className="text-lg font-semibold text-slate-900">{product.name}</h2>
                                                 <div className="flex gap-2">
                                                     <button
-                                                        onClick={() => startEdit(product)}
+                                                        onClick={() => startEditProduct(product)}
                                                         className="rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                                                     >
                                                         {t('products.edit')}
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDelete(product.id)}
+                                                        onClick={() => void handleDeleteProduct(product.id)}
                                                         className="rounded-full border border-red-200 px-3 py-1 text-sm font-medium text-red-600 transition hover:bg-red-50"
                                                     >
                                                         {t('products.delete')}
@@ -433,7 +294,7 @@ function Products() {
                                             </div>
 
                                             {editState.productId === product.id ? (
-                                                <form onSubmit={handleEditSubmit} className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                                                <form onSubmit={handleEditProductSubmit} className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
                                                     <div className="grid gap-2">
                                                         <input
                                                             value={editState.values.name}
@@ -445,6 +306,7 @@ function Products() {
                                                             <input
                                                                 type="number"
                                                                 min="0"
+                                                                step="0.1"
                                                                 value={editState.values.calories}
                                                                 onChange={(event) => setEditState((prev) => ({ ...prev, values: { ...prev.values, calories: event.target.value } }))}
                                                                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
@@ -537,9 +399,8 @@ function Products() {
                 onClose={handleRecipeBuilderClose}
                 initialData={editingRecipe ?? undefined}
                 onSaveSuccess={() => {
-                    setEditingRecipe(null)
-                    setRecipeBuilderError('')
-                    fetchRecipes()
+                    handleRecipeBuilderClose();
+                    void fetchRecipes()
                     setActiveTab('recipes')
                 }}
             />
