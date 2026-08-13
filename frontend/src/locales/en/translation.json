@@ -23,7 +23,15 @@
         "diaryCardDescription": "Review your daily entries and keep an eye on your nutrition totals.",
         "productsLabel": "Products",
         "productsCardTitle": "Manage My Collection",
-        "productsCardDescription": "Add new foods to the database so they’re available when you log your meals."
+        "productsCardDescription": "Add new foods to the database so they’re available when you log your meals.",
+        "profileLabel": "Settings",
+        "profileCardTitle": "User Profile",
+        "profileCardDescription": "Update your weight, goals, and personal preferences.",
+        "soonLabel": "Coming soon",
+        "soonCardTitle": "New Feature",
+        "soonCardDescription": "We are working on something awesome. Stay tuned!",
+        "dividerActions": "Quick Actions",
+        "dividerWidgets": "Dashboard Widgets"
     },
     "login": {
         "title": "Welcome back!",
