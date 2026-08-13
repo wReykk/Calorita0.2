@@ -64,7 +64,6 @@ export const updateEntry = async (req: AuthRequest, res: Response, next: NextFun
         const id = req.params.id as string;
         const userId = req.userId as string;
 
-        // Поддержка и weight, и amount для обратной совместимости с фронтендом
         const weight = typeof req.body.weight === 'number'
             ? req.body.weight
             : typeof req.body.amount === 'number'

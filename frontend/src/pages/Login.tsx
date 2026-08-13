@@ -62,7 +62,6 @@ function Login() {
                         {isLoading ? t('common.loading', 'Loading...') : t('login.submit', 'Sign In')}
                     </button>
 
-                    {/* Ссылка на регистрацию */}
                     <div className="mt-6 text-center text-sm text-slate-500">
                         {t('login.dontHaveAccount', "Don't have an account yet?")}
                         {' '}

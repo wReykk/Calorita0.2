@@ -28,7 +28,6 @@ export default function WaterStats({ weeklyAverage = 0 }: WaterStatsProps) {
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     {t('stats.monthly', '30 Days')}
                 </p>
-                {/* Заменили цифры на красивую цитату */}
                 <p className="text-xs font-medium italic text-slate-400">
                     {t('stats.waterQuote', 'Water is the source of life')}
                 </p>

@@ -39,7 +39,7 @@ export const updateUserParameters = async (id: string, data: UpdateUserParams) =
 
     if (goal === 'MAINTAIN') finalTargetWeight = weight;
 
-    const age = calculateAge(dateOfBirth); // Используем утилиту
+    const age = calculateAge(dateOfBirth);
 
     const macros = calculateMacros({
         weight: Number(weight), height: Number(height), age, sex,
