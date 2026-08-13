@@ -3,10 +3,10 @@
         "home": "Home",
         "myDiary": "My Diary",
         "products": "My Collection",
-        "login": "Login",
-        "register": "Register",
-        "logout": "Logout",
-        "loggedIn": "Logged in",
+        "login": "Sign In",
+        "register": "Sign Up",
+        "logout": "Sign Out",
+        "loggedIn": "Signed in",
         "hi": "Hi, {{name}}",
         "languageEnglish": "EN",
         "languageUkrainian": "UK"
@@ -26,21 +26,21 @@
         "productsCardDescription": "Add new foods to the database so they’re available when you log your meals."
     },
     "login": {
-        "title": "Welcome back",
-        "subtitle": "Sign in to continue tracking your meals and progress.",
+        "title": "Welcome back!",
+        "subtitle": "Sign in to continue tracking your meals and progress",
         "email": "Email",
         "password": "Password",
         "submit": "Sign in",
-        "error": "Login failed. Please check your credentials."
+        "error": "Signing In failed. Please check your credentials."
     },
     "register": {
-        "title": "Create your account",
-        "subtitle": "Start your journey with Calorita.",
+        "title": "Welcome to Calorita!",
+        "subtitle": "Create your account and start your journey",
         "name": "Name",
         "email": "Email",
         "password": "Password",
-        "submit": "Create account",
-        "error": "Registration failed. Please try again."
+        "submit": "Sign Up",
+        "error": "Signing Up failed. Please try again."
     },
     "myDiary": {
         "title": "My Diary",

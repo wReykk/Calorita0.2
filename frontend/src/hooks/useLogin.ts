@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { authService } from '../services/auth.service'
 
@@ -7,13 +6,14 @@ export const useLogin = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
 
-    const navigate = useNavigate()
     const { t } = useTranslation()
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         setError('')
+        setIsLoading(true)
 
         try {
             const data = await authService.login({ email, password })
@@ -43,23 +43,18 @@ export const useLogin = () => {
                     localStorage.removeItem('username')
                 }
 
-                navigate('/')
+                window.location.href = '/'
             }
+
         } catch {
             setError(t('login.error'))
+        } finally {
+            setIsLoading(false)
         }
     }
 
     return {
-        state: {
-            email,
-            password,
-            error
-        },
-        actions: {
-            setEmail,
-            setPassword,
-            handleSubmit
-        }
+        state: { email, password, error, isLoading },
+        actions: { setEmail, setPassword, handleSubmit }
     }
 }

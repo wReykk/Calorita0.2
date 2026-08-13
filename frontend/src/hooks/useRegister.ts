@@ -34,7 +34,7 @@ export const useRegister = () => {
             setNameError(t('register.errorNameLong', 'Username cannot exceed 30 characters.'))
             hasErrors = true
         } else if (nameValidationResult === 'invalid') {
-            setNameError(t('register.errorNameInvalid', 'Username contains invalid characters (e.g., @, !, #).'))
+            setNameError(t('register.errorNameInvalid', 'Username can only contain English letters, numbers, spaces, hyphens, and underscores.'))
             hasErrors = true
         }
 
@@ -45,19 +45,23 @@ export const useRegister = () => {
             setPasswordError(t('register.errorPasswordSpaces', 'Password cannot contain spaces.'))
             hasErrors = true
         }
-
         if (hasErrors) return
 
         setIsLoading(true)
         try {
             await authService.register({ name: name.trim(), email: email.trim(), password })
+
             const loginData = await authService.login({ email: email.trim(), password })
 
             if (loginData?.token) {
                 localStorage.setItem('token', loginData.token)
+                if (loginData.user) {
+                    localStorage.setItem('user', JSON.stringify(loginData.user))
+                }
+                window.location.href = '/'
             }
         } catch {
-            setGlobalError(t('register.errorServer', 'Registration failed. Please try again.'))
+            setGlobalError(t('register.errorServer', 'Sign up failed. Please try again.'))
         } finally {
             setIsLoading(false)
         }
