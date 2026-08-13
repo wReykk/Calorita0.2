@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 interface WeightReminderProps {
     weightLogs: { date: string }[];
-    onClose?: () => void;
 }
 
 export default function WeightReminder({ weightLogs }: WeightReminderProps) {

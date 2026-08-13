@@ -1,72 +1,70 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { authService } from '../services/auth.service'
+import { validateName, validatePassword } from '../utils/validation.utils'
 
 export const useRegister = () => {
+    const { t } = useTranslation()
+
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
-    const [successMessage, setSuccessMessage] = useState('')
 
-    const navigate = useNavigate()
-    const { t } = useTranslation()
+    const [nameError, setNameError] = useState('')
+    const [passwordError, setPasswordError] = useState('')
+    const [globalError, setGlobalError] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
 
-    const persistAuthState = (token: string, user: Record<string, unknown>) => {
-        localStorage.setItem('token', token)
-        localStorage.setItem('user', JSON.stringify(user))
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
 
-        if (user.id) {
-            localStorage.setItem('userId', String(user.id))
+        setNameError('')
+        setPasswordError('')
+        setGlobalError('')
+
+        const nameValidationResult = validateName(name)
+        const passwordValidationResult = validatePassword(password)
+
+        let hasErrors = false
+
+        if (nameValidationResult === 'short') {
+            setNameError(t('register.errorNameShort', 'Username must be at least 3 characters.'))
+            hasErrors = true
+        } else if (nameValidationResult === 'long') {
+            setNameError(t('register.errorNameLong', 'Username cannot exceed 30 characters.'))
+            hasErrors = true
+        } else if (nameValidationResult === 'invalid') {
+            setNameError(t('register.errorNameInvalid', 'Username contains invalid characters (e.g., @, !, #).'))
+            hasErrors = true
         }
-    }
 
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-        setError('')
-        setSuccessMessage('')
+        if (passwordValidationResult === 'short') {
+            setPasswordError(t('register.errorPasswordShort', 'Password must be at least 8 characters.'))
+            hasErrors = true
+        } else if (passwordValidationResult === 'spaces') {
+            setPasswordError(t('register.errorPasswordSpaces', 'Password cannot contain spaces.'))
+            hasErrors = true
+        }
 
+        if (hasErrors) return
+
+        setIsLoading(true)
         try {
-            const registerData = await authService.register({ name, email, password })
+            await authService.register({ name: name.trim(), email: email.trim(), password })
+            const loginData = await authService.login({ email: email.trim(), password })
 
-            if (registerData?.token) {
-                persistAuthState(registerData.token, registerData)
-            } else {
-                const loginData = await authService.login({ email, password })
-                const user = loginData?.user
-                const token = loginData?.token
-
-                if (token && user) {
-                    persistAuthState(token, user)
-                } else {
-                    throw new Error('Unable to authenticate user after registration')
-                }
+            if (loginData?.token) {
+                localStorage.setItem('token', loginData.token)
             }
-
-            setSuccessMessage('User registered successfully! Redirecting...')
-
-            window.setTimeout(() => {
-                navigate('/onboarding', { replace: true })
-            }, 2000)
         } catch {
-            setError(t('register.error'))
+            setGlobalError(t('register.errorServer', 'Registration failed. Please try again.'))
+        } finally {
+            setIsLoading(false)
         }
     }
 
     return {
-        state: {
-            name,
-            email,
-            password,
-            error,
-            successMessage
-        },
-        actions: {
-            setName,
-            setEmail,
-            setPassword,
-            handleSubmit
-        }
+        state: { name, email, password, nameError, passwordError, globalError, isLoading },
+        actions: { setName, setEmail, setPassword, handleSubmit }
     }
 }
