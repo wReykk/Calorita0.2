@@ -38,8 +38,11 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
   },
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
-    "frontend",
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }
