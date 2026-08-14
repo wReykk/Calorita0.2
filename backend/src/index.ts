@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors({
     origin: [
-        'https://calorita-0-2.vercel.app/api',
+        'https://calorita-0-2.vercel.app',
         'http://localhost:5173'
     ],
     credentials: true
