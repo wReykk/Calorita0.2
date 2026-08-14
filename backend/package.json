@@ -22,6 +22,7 @@
     "deepl-node": "^1.27.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "https-proxy-agent": "^9.1.0",
     "init": "^0.1.2",
     "jsonwebtoken": "^9.0.3",
     "recharts": "^3.10.1",

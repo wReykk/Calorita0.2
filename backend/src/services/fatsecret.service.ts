@@ -1,11 +1,23 @@
 import axios from 'axios';
 import { translateText } from './translation.service.js';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 let accessToken = '';
 let tokenExpiration = 0;
 
 const FATSECRET_TOKEN_URL = 'https://oauth.fatsecret.com/connect/token';
 const FATSECRET_API_URL = 'https://platform.fatsecret.com/rest/server.api';
+
+const PROXY_HOST = process.env.PROXY_HOST;
+const PROXY_PORT = process.env.PROXY_PORT;
+const PROXY_USER = process.env.PROXY_USER;
+const PROXY_PASS = process.env.PROXY_PASS;
+
+let proxyAgent: HttpsProxyAgent<string> | undefined = undefined;
+
+if (PROXY_HOST && PROXY_PORT && PROXY_USER && PROXY_PASS) {
+    proxyAgent = new HttpsProxyAgent(`http://${PROXY_USER}:${PROXY_PASS}@${PROXY_HOST}:${PROXY_PORT}`);
+}
 
 const getMacro = (desc: string, regex: RegExp): number => {
     const match = desc.match(regex);
@@ -44,7 +56,8 @@ async function getAccessToken(): Promise<string> {
             headers: {
                 'Authorization': `Basic ${credentials}`,
                 'Content-Type': 'application/x-www-form-urlencoded'
-            }
+            },
+            httpsAgent: proxyAgent
         }
     );
 
@@ -64,7 +77,8 @@ const fetchFromFatSecret = async (query: string, token: string) => {
         },
         headers: {
             'Authorization': `Bearer ${token}`
-        }
+        },
+        httpsAgent: proxyAgent
     });
 };
 
